@@ -1,31 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Math Quiz</title>
-  
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap">
-  
-  <link rel="stylesheet" href="style.css">
-  
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Quiz</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
-    <h1>Math Quiz</h1>
-    <div class="quiz">
-      <h2 id="question">Question</h2>
-      <div id="answer-buttons">
-        <button class="btn">Answer 1</button>
-        <button class="btn">Answer 2</button>
-        <button class="btn">Answer 3</button>
-        <button class="btn">Answer 4</button>
+<div class="app">
+
+  <!-- HOME SCREEN -->
+  <div id="home-screen" class="active">
+    <div class="home-container">
+      <!-- LEFT: Leaderboard -->
+      <div class="home-left">
+        <h3>Leaderboard</h3>
+        <ul id="leaderboard"></ul>
       </div>
-      <button id="next-btn">
-      	Next
-      </button>
+
+      <!-- RIGHT: Title + Play Button -->
+      <div class="home-right">
+        <h1>Math Quiz</h1>
+        <button id="play-btn" class="big-btn">Play</button>
+      </div>
     </div>
   </div>
-  <script src="main.js"></script>
+
+  <!-- USERNAME SCREEN -->
+  <div id="username-screen">
+    <h2>Enter Your Username</h2>
+    <input type="text" id="username-input" placeholder="Username">
+    <button id="username-btn" class="btn">Next</button>
+  </div>
+
+  <!-- DIFFICULTY SCREEN -->
+  <div id="difficulty-screen">
+    <h2>Select Difficulty</h2>
+    <button class="btn difficulty" data-level="easy">Easy</button>
+    <button class="btn difficulty" data-level="medium">Medium</button>
+    <button class="btn difficulty" data-level="hard">Hard</button>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quiz-screen">
+    <h2 id="question">Question</h2>
+    <div id="timer">Time Left: 0s</div>
+    <div id="answer-buttons"></div>
+    <button id="next-btn">Next</button>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="result-screen">
+    <h2>Result</h2>
+    <p>Score: <span id="result-score"></span></p>
+    <p>Time Taken: <span id="result-time"></span> s</p>
+    <ul id="leaderboard"></ul>
+    <button id="result-home" class="btn">Home</button>
+    <button id="result-play-again" class="btn">Play Again</button>
+  </div>
+
+</div>
+<script src="main.js"></script>
 </body>
 </html>
