@@ -1,0 +1,1910 @@
+<!-- THIS FILE CONTAINS NEW FEATURES ONLY. 
+USE THE FEATURES HERE BUT KEEP THE UI DESIGN FROM index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NumerIQ - Where Numbers Come Alive</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a1f;
+            --bg-secondary: #1a1a2e;
+            --bg-panel: #16213e;
+            --neon-magenta: #ff00ff;
+            --neon-cyan: #00ffff;
+            --neon-gold: #ffcc00;
+            --neon-green: #00ff00;
+            --neon-red: #ff3333;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0c0;
+            --border-glow: rgba(255, 0, 255, 0.5);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px);
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.3;
+        }
+        #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; position: relative; z-index: 10; }
+        .header { text-align: center; padding: 30px 0; border-bottom: 2px solid var(--neon-magenta); margin-bottom: 30px; }
+        .logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 3rem;
+            background: linear-gradient(45deg, var(--neon-magenta), var(--neon-cyan), var(--neon-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px var(--neon-magenta);
+            animation: logoPulse 3s infinite;
+        }
+        @keyframes logoPulse { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.3); } }
+        .tagline { color: var(--text-secondary); margin-top: 10px; font-size: 1.2rem; }
+        .nav-bar { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; flex-wrap: wrap; }
+        .nav-btn {
+            padding: 12px 24px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            border-radius: 8px;
+        }
+        .nav-btn:hover { background: var(--neon-cyan); color: var(--bg-primary); box-shadow: 0 0 20px var(--neon-cyan); transform: translateY(-2px); }
+        .btn {
+            padding: 15px 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 10px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, var(--neon-magenta), #ff66ff);
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+        }
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--neon-magenta); }
+        .btn-secondary {
+            background: linear-gradient(45deg, var(--neon-cyan), #66ffff);
+            color: var(--bg-primary);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        .btn-secondary:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--neon-cyan); }
+        .btn-danger {
+            background: linear-gradient(45deg, var(--neon-red), #ff6666);
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.5);
+        }
+        .btn-danger:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--neon-red); }
+        .btn:active { transform: scale(0.95); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .panel {
+            background: var(--bg-panel);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+        }
+        .panel-title {
+            font-size: 1.5rem;
+            color: var(--neon-gold);
+            margin-bottom: 20px;
+            text-align: center;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--neon-gold);
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; color: var(--neon-cyan); font-size: 0.9rem; }
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-input:focus { outline: none; border-color: var(--neon-magenta); box-shadow: 0 0 15px rgba(255, 0, 255, 0.3); }
+        .form-error { color: var(--neon-red); font-size: 0.85rem; margin-top: 5px; }
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal {
+            background: var(--bg-panel);
+            border: 3px solid var(--neon-magenta);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+        }
+        .modal-overlay.active .modal { transform: scale(1); }
+        .modal-close {
+            position: absolute;
+            top: 15px; right: 15px;
+            background: none;
+            border: none;
+            color: var(--neon-red);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .modal-close:hover { transform: scale(1.2); color: #ff6666; }
+        .hero-section { text-align: center; padding: 60px 20px; }
+        .hero-buttons { display: flex; justify-content: center; gap: 30px; margin: 40px 0; flex-wrap: wrap; }
+        .hero-btn { padding: 25px 50px; font-size: 1.3rem; min-width: 200px; }
+        .stats-preview {
+            background: var(--bg-panel);
+            border: 2px solid var(--neon-gold);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px auto;
+            max-width: 600px;
+            text-align: center;
+        }
+        .stats-preview h3 { color: var(--neon-gold); margin-bottom: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .stat-item { padding: 15px; background: var(--bg-secondary); border-radius: 10px; }
+        .stat-value { font-size: 1.5rem; color: var(--neon-cyan); font-weight: bold; }
+        .stat-label { font-size: 0.85rem; color: var(--text-secondary); }
+        .example-note { font-size: 0.8rem; color: var(--text-secondary); margin-top: 15px; font-style: italic; }
+        .modes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 30px 0; }
+        .mode-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .mode-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3); border-color: var(--neon-magenta); }
+        .mode-card.locked { opacity: 0.5; cursor: not-allowed; }
+        .mode-icon { font-size: 3rem; margin-bottom: 15px; }
+        .mode-name { font-size: 1.2rem; color: var(--neon-gold); margin-bottom: 10px; }
+        .mode-desc { font-size: 0.9rem; color: var(--text-secondary); }
+        .difficulty-selector { display: flex; justify-content: center; gap: 15px; margin: 30px 0; flex-wrap: wrap; }
+        .difficulty-btn {
+            padding: 15px 25px;
+            border: 2px solid;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-secondary);
+        }
+        .difficulty-btn.easy { border-color: #00ff00; color: #00ff00; }
+        .difficulty-btn.easy:hover, .difficulty-btn.easy.active { background: #00ff00; color: var(--bg-primary); box-shadow: 0 0 20px #00ff00; }
+        .difficulty-btn.medium { border-color: #ffff00; color: #ffff00; }
+        .difficulty-btn.medium:hover, .difficulty-btn.medium.active { background: #ffff00; color: var(--bg-primary); box-shadow: 0 0 20px #ffff00; }
+        .difficulty-btn.hard { border-color: #ff3333; color: #ff3333; }
+        .difficulty-btn.hard:hover, .difficulty-btn.hard.active { background: #ff3333; color: white; box-shadow: 0 0 20px #ff3333; }
+        .difficulty-btn.extreme { border-color: #aa00ff; color: #aa00ff; }
+        .difficulty-btn.extreme:hover, .difficulty-btn.extreme.active { background: #aa00ff; color: white; box-shadow: 0 0 20px #aa00ff; }
+        .difficulty-btn.locked { opacity: 0.3; cursor: not-allowed; }
+        .game-screen { display: none; text-align: center; }
+        .game-screen.active { display: block; }
+        .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
+        .game-stat { background: var(--bg-secondary); padding: 15px 25px; border-radius: 10px; border: 2px solid var(--neon-cyan); }
+        .game-stat-label { font-size: 0.8rem; color: var(--text-secondary); }
+        .game-stat-value { font-size: 1.5rem; color: var(--neon-gold); font-weight: bold; }
+        .flame-container { display: flex; justify-content: center; align-items: center; margin: 20px 0; min-height: 100px; }
+        .flame { font-size: 2rem; transition: all 0.3s ease; filter: drop-shadow(0 0 10px orange); }
+        .flame.streak-1 { font-size: 1.5rem; filter: drop-shadow(0 0 5px #88ccff); }
+        .flame.streak-3 { font-size: 2rem; filter: drop-shadow(0 0 10px #66ff66); }
+        .flame.streak-5 { font-size: 2.5rem; filter: drop-shadow(0 0 15px #ffff66); }
+        .flame.streak-7 { font-size: 3rem; filter: drop-shadow(0 0 20px #ffaa66); }
+        .flame.streak-10 { font-size: 4rem; filter: drop-shadow(0 0 25px #ff6666); }
+        .flame.streak-15 { font-size: 5rem; filter: drop-shadow(0 0 30px #ff66ff); }
+        .flame.streak-20 { font-size: 6rem; filter: drop-shadow(0 0 40px gold); animation: rainbowFlame 1s infinite; }
+        @keyframes rainbowFlame {
+            0% { filter: drop-shadow(0 0 40px violet); }
+            16% { filter: drop-shadow(0 0 40px indigo); }
+            33% { filter: drop-shadow(0 0 40px blue); }
+            50% { filter: drop-shadow(0 0 40px green); }
+            66% { filter: drop-shadow(0 0 40px yellow); }
+            83% { filter: drop-shadow(0 0 40px orange); }
+            100% { filter: drop-shadow(0 0 40px red); }
+        }
+        .question-container { background: var(--bg-secondary); border: 3px solid var(--neon-magenta); border-radius: 20px; padding: 40px; margin: 30px 0; }
+        .question-text { font-size: 2.5rem; color: var(--neon-gold); text-shadow: 0 0 20px var(--neon-gold); margin-bottom: 20px; }
+        .timer-bar { width: 100%; height: 10px; background: var(--bg-primary); border-radius: 5px; overflow: hidden; margin-top: 20px; }
+        .timer-fill { height: 100%; background: linear-gradient(90deg, var(--neon-green), var(--neon-gold), var(--neon-red)); transition: width 0.1s linear; }
+        .answer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 30px 0; }
+        .answer-btn {
+            padding: 25px;
+            font-size: 1.5rem;
+            background: var(--bg-panel);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 15px;
+            color: var(--text-primary);
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .answer-btn:hover:not(:disabled) { background: var(--neon-cyan); color: var(--bg-primary); transform: scale(1.05); box-shadow: 0 0 20px var(--neon-cyan); }
+        .answer-btn.correct { background: var(--neon-green) !important; color: var(--bg-primary) !important; border-color: var(--neon-green) !important; animation: correctFlash 0.5s; }
+        .answer-btn.wrong { background: var(--neon-red) !important; color: white !important; border-color: var(--neon-red) !important; animation: wrongFlash 0.5s; }
+        .answer-btn.show-correct { background: var(--neon-green) !important; color: var(--bg-primary) !important; border-color: var(--neon-green) !important; box-shadow: 0 0 30px var(--neon-green); }
+        @keyframes correctFlash { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); filter: brightness(1.5); } }
+        @keyframes wrongFlash { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); filter: brightness(1.3); } }
+        .feedback-message {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            font-weight: bold;
+            text-shadow: 0 0 30px currentColor;
+            z-index: 3000;
+            animation: feedbackPop 0.8s ease-out forwards;
+            pointer-events: none;
+        }
+        .feedback-message.correct { color: var(--neon-green); }
+        .feedback-message.wrong { color: var(--neon-red); }
+        .feedback-message.timeout { color: #ffaa00; }
+        @keyframes feedbackPop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            30% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+        .lives-display { font-size: 2rem; color: var(--neon-red); }
+        .game-over-screen { display: none; text-align: center; padding: 40px; }
+        .game-over-screen.active { display: block; }
+        .final-score { font-size: 4rem; color: var(--neon-gold); text-shadow: 0 0 30px var(--neon-gold); margin: 20px 0; }
+        .stats-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin: 30px 0; }
+        .leaderboard-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .leaderboard-table th, .leaderboard-table td { padding: 15px; text-align: center; border-bottom: 1px solid var(--neon-cyan); }
+        .leaderboard-table th { color: var(--neon-gold); font-weight: bold; }
+        .leaderboard-table tr:hover { background: rgba(0, 255, 255, 0.1); }
+        .leaderboard-table .rank-1 { color: gold; font-weight: bold; }
+        .leaderboard-table .rank-2 { color: silver; font-weight: bold; }
+        .leaderboard-table .rank-3 { color: #cd7f32; font-weight: bold; }
+        .player-name-link { color: var(--neon-cyan); cursor: pointer; text-decoration: underline; transition: all 0.3s ease; }
+        .player-name-link:hover { color: var(--neon-magenta); text-shadow: 0 0 10px var(--neon-magenta); }
+        .avatar {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto 15px;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar.bronze { box-shadow: 0 0 20px #cd7f32; animation: bronzePulse 2s infinite; }
+        .avatar.silver { box-shadow: 0 0 20px #c0c0c0; animation: silverShine 3s infinite; }
+        .avatar.gold { box-shadow: 0 0 25px #ffd700; animation: goldSparkle 2s infinite; }
+        .avatar.platinum { background: linear-gradient(45deg, #e5e4e2, #fff, #e5e4e2); background-size: 200% 200%; animation: platinumWave 3s infinite; }
+        .avatar.legendary { background: linear-gradient(45deg, violet, indigo, blue, green, yellow, orange, red); background-size: 400% 400%; animation: legendaryRainbow 3s infinite; }
+        @keyframes bronzePulse { 0%, 100% { box-shadow: 0 0 20px #cd7f32; } 50% { box-shadow: 0 0 30px #ffaa00; } }
+        @keyframes silverShine { 0%, 100% { box-shadow: 0 0 20px #c0c0c0; } 50% { box-shadow: 0 0 35px #ffffff; } }
+        @keyframes goldSparkle { 0%, 100% { box-shadow: 0 0 25px #ffd700; } 50% { box-shadow: 0 0 40px #ffaa00; } }
+        @keyframes platinumWave { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes legendaryRainbow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .achievements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin: 20px 0; }
+        .achievement-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+        .achievement-card.unlocked { border-color: var(--neon-gold); box-shadow: 0 0 15px rgba(255, 204, 0, 0.3); }
+        .achievement-card.locked { opacity: 0.5; }
+        .achievement-icon { font-size: 2rem; }
+        .achievement-info h4 { color: var(--neon-gold); margin-bottom: 5px; }
+        .achievement-info p { font-size: 0.85rem; color: var(--text-secondary); }
+        .friend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--neon-cyan);
+        }
+        .friend-info { display: flex; align-items: center; gap: 15px; }
+        .friend-avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--bg-panel); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .friend-status { width: 12px; height: 12px; border-radius: 50%; margin-left: 10px; }
+        .friend-status.online { background: #00ff00; box-shadow: 0 0 10px #00ff00; }
+        .friend-status.offline { background: #666; }
+        .friend-actions { display: flex; gap: 10px; }
+        .friend-actions button { padding: 8px 15px; font-size: 0.85rem; }
+        .message-item { padding: 15px; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--neon-cyan); }
+        .message-item.unread { border-left-color: var(--neon-gold); background: rgba(255, 204, 0, 0.1); }
+        .message-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .message-sender { color: var(--neon-cyan); font-weight: bold; }
+        .message-time { font-size: 0.8rem; color: var(--text-secondary); }
+        .message-content { color: var(--text-primary); }
+        .profile-header { text-align: center; padding: 30px; background: var(--bg-secondary); border-radius: 15px; margin-bottom: 30px; }
+        .profile-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin: 30px 0; }
+        .profile-stat-box { background: var(--bg-panel); padding: 20px; border-radius: 10px; text-align: center; border: 2px solid var(--neon-cyan); }
+        .profile-stat-value { font-size: 2rem; color: var(--neon-gold); font-weight: bold; }
+        .profile-stat-label { font-size: 0.9rem; color: var(--text-secondary); margin-top: 5px; }
+        .match-history-item { padding: 15px; background: var(--bg-secondary); border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .match-result { padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+        .match-result.win { background: rgba(0, 255, 0, 0.2); color: #00ff00; }
+        .match-result.loss { background: rgba(255, 51, 51, 0.2); color: #ff3333; }
+        .pvp-screen { display: none; }
+        .pvp-screen.active { display: block; }
+        .pvp-players { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 30px 0; }
+        .pvp-player { background: var(--bg-secondary); border: 3px solid var(--neon-cyan); border-radius: 15px; padding: 25px; text-align: center; }
+        .pvp-player.eliminated { opacity: 0.3; border-color: var(--neon-red); }
+        .pvp-player-header { margin-bottom: 20px; }
+        .pvp-player-name { font-size: 1.3rem; color: var(--neon-gold); }
+        .pvp-player-stats { display: flex; justify-content: space-around; margin: 20px 0; }
+        .spectator-view { display: none; }
+        .spectator-view.active { display: block; }
+        .spectator-count { position: fixed; top: 20px; right: 20px; background: var(--bg-panel); padding: 10px 20px; border-radius: 20px; border: 2px solid var(--neon-cyan); z-index: 100; }
+        .settings-section { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--neon-cyan); }
+        .settings-section:last-child { border-bottom: none; }
+        .settings-title { color: var(--neon-gold); margin-bottom: 15px; }
+        .slider-container { margin: 15px 0; }
+        .slider { width: 100%; height: 8px; border-radius: 4px; background: var(--bg-secondary); outline: none; -webkit-appearance: none; }
+        .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--neon-cyan); cursor: pointer; box-shadow: 0 0 10px var(--neon-cyan); }
+        .color-presets { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .color-preset { width: 60px; height: 60px; border-radius: 10px; cursor: pointer; border: 3px solid transparent; transition: all 0.3s ease; }
+        .color-preset:hover, .color-preset.active { border-color: white; transform: scale(1.1); box-shadow: 0 0 20px currentColor; }
+        .preset-1 { background: linear-gradient(45deg, blue, orange, red, yellow); }
+        .preset-2 { background: linear-gradient(45deg, #88ccff, #00ffff, #0066ff, #6600ff); }
+        .preset-3 { background: linear-gradient(45deg, #ff66cc, #ff00ff, #9900ff, #6600cc); }
+        .preset-4 { background: linear-gradient(45deg, #66ff66, #00ff00, #006600, #003300); }
+        .preset-5 { background: linear-gradient(45deg, gold, orange, darkgoldenrod, purple); }
+        .toggle-container { display: flex; align-items: center; gap: 15px; margin: 10px 0; }
+        .toggle { width: 50px; height: 25px; background: var(--bg-secondary); border-radius: 25px; position: relative; cursor: pointer; transition: all 0.3s ease; }
+        .toggle.active { background: var(--neon-green); }
+        .toggle::after { content: ''; position: absolute; width: 20px; height: 20px; background: white; border-radius: 50%; top: 2.5px; left: 2.5px; transition: all 0.3s ease; }
+        .toggle.active::after { left: 27.5px; }
+        .trial-banner { background: linear-gradient(90deg, var(--neon-red), #ff6600); padding: 15px; text-align: center; border-radius: 10px; margin-bottom: 20px; animation: trialPulse 2s infinite; }
+        @keyframes trialPulse { 0%, 100% { box-shadow: 0 0 20px var(--neon-red); } 50% { box-shadow: 0 0 40px #ff6600; } }
+        .trial-banner h3 { margin-bottom: 10px; }
+        .lock-popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); display: none; justify-content: center; align-items: center; z-index: 3000; }
+        .lock-popup.active { display: flex; }
+        .lock-content { background: var(--bg-panel); border: 3px solid var(--neon-red); border-radius: 20px; padding: 40px; max-width: 500px; text-align: center; }
+        .lock-content h2 { color: var(--neon-red); margin-bottom: 20px; }
+        .lock-features { text-align: left; margin: 20px 0; }
+        .lock-features li { margin: 10px 0; color: var(--neon-cyan); }
+        @media (max-width: 768px) {
+            .logo { font-size: 2rem; }
+            .hero-buttons { flex-direction: column; align-items: center; }
+            .answer-grid { grid-template-columns: 1fr; }
+            .pvp-players { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .leaderboard-table { font-size: 0.85rem; }
+            .leaderboard-table th, .leaderboard-table td { padding: 10px 5px; }
+            .question-text { font-size: 1.8rem; }
+        }
+        .section { display: none; }
+        .section.active { display: block; }
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-magenta); }
+        .screen-shake { animation: shake 0.5s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .loading { display: inline-block; width: 40px; height: 40px; border: 4px solid var(--neon-cyan); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .notification-badge { position: absolute; top: -5px; right: -5px; background: var(--neon-red); color: white; font-size: 0.75rem; padding: 3px 8px; border-radius: 10px; font-weight: bold; }
+        .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
+        .empty-state-icon { font-size: 4rem; margin-bottom: 20px; opacity: 0.5; }
+        .privacy-badge { display: inline-block; padding: 5px 15px; border-radius: 15px; font-size: 0.8rem; margin-left: 10px; }
+        .privacy-badge.public { background: rgba(0, 255, 0, 0.2); color: #00ff00; }
+        .privacy-badge.friends { background: rgba(255, 204, 0, 0.2); color: #ffcc00; }
+        .privacy-badge.private { background: rgba(255, 51, 51, 0.2); color: #ff3333; }
+    </style>
+</head>
+<body>
+    <canvas id="particle-canvas"></canvas>
+    <header class="header">
+        <h1 class="logo">NUMERIQ</h1>
+        <p class="tagline">Where Numbers Come Alive</p>
+    </header>
+    <nav class="nav-bar" id="main-nav" style="display: none;">
+        <button class="nav-btn" onclick="showSection('dashboard')">Dashboard</button>
+        <button class="nav-btn" onclick="showSection('play')">Play</button>
+        <button class="nav-btn" onclick="showSection('leaderboard')">Leaderboard</button>
+        <button class="nav-btn" onclick="showSection('achievements')">Achievements</button>
+        <button class="nav-btn" onclick="showSection('friends')">Friends <span id="friend-badge"></span></button>
+        <button class="nav-btn" onclick="showSection('messages')">Messages <span id="message-badge"></span></button>
+        <button class="nav-btn" onclick="showSection('profile')">Profile</button>
+        <button class="nav-btn" onclick="showSection('settings')">Settings</button>
+        <button class="nav-btn" onclick="logout()">Logout</button>
+    </nav>
+    <div id="landing-section" class="section active">
+        <div class="hero-section">
+            <div class="hero-buttons">
+                <button class="btn btn-primary hero-btn" onclick="showAuthModal('signup')">▶ PLAY NOW<br><small>(Sign in required)</small></button>
+                <button class="btn btn-secondary hero-btn" onclick="startTrialMode()">🎮 TRY DEMO<br><small>(No login needed)</small></button>
+            </div>
+            <div class="stats-preview">
+                <h3>📊 EXAMPLE STATISTICS 📊</h3>
+                <p class="example-note">(Reference only - not real)</p>
+                <div class="stats-grid">
+                    <div class="stat-item"><div class="stat-value">1,247</div><div class="stat-label">Active Players</div></div>
+                    <div class="stat-item"><div class="stat-value">4,892</div><div class="stat-label">Games Played</div></div>
+                    <div class="stat-item"><div class="stat-value">98,453</div><div class="stat-label">Problems Solved</div></div>
+                    <div class="stat-item"><div class="stat-value">12,450</div><div class="stat-label">Highest Score</div></div>
+                </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title">🎮 What is NumerIQ?</h2>
+                <p style="text-align: center; margin-bottom: 30px;">NumerIQ is an arcade-style math quiz game that tests your number skills with 4 exciting modes!</p>
+                <div class="modes-grid">
+                    <div class="mode-card"><div class="mode-icon">📋</div><div class="mode-name">CLASSIC</div><div class="mode-desc">20 Questions • Timed</div></div>
+                    <div class="mode-card"><div class="mode-icon">⏱️</div><div class="mode-name">TIME ATTACK</div><div class="mode-desc">Endless • Timer +/-</div></div>
+                    <div class="mode-card"><div class="mode-icon">❤️</div><div class="mode-name">SURVIVAL</div><div class="mode-desc">3 Lives • Gain Lives</div></div>
+                    <div class="mode-card"><div class="mode-icon">🎯</div><div class="mode-name">PRACTICE</div><div class="mode-desc">No Pressure • No Score</div></div>
+                </div>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title">🔥 Dynamic Flame System</h2>
+                <p style="text-align: center;">Watch your flame grow with every correct answer!</p>
+                <div class="flame-container">
+                    <span class="flame streak-1">🔥</span>
+                    <span class="flame streak-5">🔥🔥</span>
+                    <span class="flame streak-10">🔥🔥🔥🔥</span>
+                    <span class="flame streak-20">🔥🔥🔥🔥🔥🔥</span>
+                </div>
+                <p style="text-align: center; color: var(--text-secondary);">Flame disappears immediately on wrong answer!</p>
+            </div>
+            <div class="panel">
+                <h2 class="panel-title">📊 Four Difficulty Levels</h2>
+                <div class="difficulty-selector">
+                    <div class="difficulty-btn easy">EASY<br>+10/-2</div>
+                    <div class="difficulty-btn medium">MEDIUM<br>+20/-5</div>
+                    <div class="difficulty-btn hard">HARD<br>+30/-10</div>
+                    <div class="difficulty-btn extreme">EXTREME<br>+50/-20</div>
+                </div>
+                <p style="text-align: center; color: var(--text-secondary);">Unlock Extreme by scoring 1000+ in Hard or completing 25 achievements!</p>
+            </div>
+        </div>
+    </div>
+    <div id="dashboard-section" class="section container">
+        <div class="panel">
+            <h2 class="panel-title">Welcome Back, <span id="dash-username">Player</span>!</h2>
+            <div class="profile-stats-grid">
+                <div class="profile-stat-box"><div class="profile-stat-value" id="dash-rank">#--</div><div class="profile-stat-label">Overall Rank</div></div>
+                <div class="profile-stat-box"><div class="profile-stat-value" id="dash-score">0</div><div class="profile-stat-label">Total Score</div></div>
+                <div class="profile-stat-box"><div class="profile-stat-value" id="dash-games">0</div><div class="profile-stat-label">Games Played</div></div>
+                <div class="profile-stat-box"><div class="profile-stat-value" id="dash-accuracy">0%</div><div class="profile-stat-label">Accuracy</div></div>
+            </div>
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-primary" onclick="showSection('play')">▶ PLAY NOW</button>
+                <button class="btn btn-secondary" onclick="showSection('pvp-lobby')">⚔️ PVP BATTLE</button>
+            </div>
+        </div>
+        <div class="panel">
+            <h2 class="panel-title">🏆 Recent Achievements</h2>
+            <div id="dash-achievements" class="achievements-grid"><p class="empty-state">No achievements yet. Start playing to unlock!</p></div>
+        </div>
+    </div>
+    <div id="play-section" class="section container">
+        <div class="panel">
+            <h2 class="panel-title">Select Game Mode</h2>
+            <div class="modes-grid">
+                <div class="mode-card" onclick="selectGameMode('classic')"><div class="mode-icon">📋</div><div class="mode-name">CLASSIC</div><div class="mode-desc">20 Questions • 15s per question</div></div>
+                <div class="mode-card" onclick="selectGameMode('timeattack')"><div class="mode-icon">⏱️</div><div class="mode-name">TIME ATTACK</div><div class="mode-desc">Endless • Timer +/- on answers</div></div>
+                <div class="mode-card" onclick="selectGameMode('survival')"><div class="mode-icon">❤️</div><div class="mode-name">SURVIVAL</div><div class="mode-desc">3 Lives • Gain life every 5 correct</div></div>
+                <div class="mode-card" onclick="selectGameMode('practice')"><div class="mode-icon">🎯</div><div class="mode-name">PRACTICE</div><div class="mode-desc">No time limit • No scoring</div></div>
+            </div>
+        </div>
+        <div class="panel" id="difficulty-panel" style="display: none;">
+            <h2 class="panel-title">Select Difficulty</h2>
+            <div class="difficulty-selector">
+                <button class="difficulty-btn easy" onclick="selectDifficulty('easy')">EASY<br>+10/-2<br>20s</button>
+                <button class="difficulty-btn medium" id="diff-medium" onclick="selectDifficulty('medium')">MEDIUM<br>+20/-5<br>15s</button>
+                <button class="difficulty-btn hard" id="diff-hard" onclick="selectDifficulty('hard')">HARD<br>+30/-10<br>10s</button>
+                <button class="difficulty-btn extreme locked" id="diff-extreme" onclick="selectDifficulty('extreme')">EXTREME<br>+50/-20<br>7s<br>🔒</button>
+            </div>
+        </div>
+    </div>
+    <div id="game-screen" class="game-screen container">
+        <div id="trial-banner" class="trial-banner" style="display: none;">
+            <h3>🎮 TRIAL MODE - No scores saved</h3>
+            <p>Sign up to save your progress and unlock all features!</p>
+            <button class="btn btn-primary" onclick="showAuthModal('signup')">SIGN UP NOW</button>
+        </div>
+        <div class="game-header">
+            <div class="game-stat"><div class="game-stat-label">SCORE</div><div class="game-stat-value" id="game-score">0</div></div>
+            <div class="game-stat"><div class="game-stat-label">QUESTION</div><div class="game-stat-value"><span id="current-q">1</span>/<span id="total-q">20</span></div></div>
+            <div class="game-stat" id="lives-stat" style="display: none;"><div class="game-stat-label">LIVES</div><div class="lives-display" id="game-lives">❤️❤️❤️</div></div>
+            <div class="game-stat" id="time-stat"><div class="game-stat-label">TIME</div><div class="game-stat-value" id="game-time">15</div></div>
+        </div>
+        <div class="flame-container"><span id="flame-display"></span></div>
+        <div style="text-align: center; margin-bottom: 10px;"><span style="color: var(--neon-gold);">STREAK: <span id="streak-display">0</span></span><span id="multiplier-display" style="color: var(--neon-cyan); margin-left: 20px;"></span></div>
+        <div class="question-container">
+            <div class="question-text" id="question-text">Loading...</div>
+            <div class="timer-bar"><div class="timer-fill" id="timer-fill" style="width: 100%;"></div></div>
+        </div>
+        <div class="answer-grid" id="answer-grid">
+            <button class="answer-btn" onclick="checkAnswer(0)">--</button>
+            <button class="answer-btn" onclick="checkAnswer(1)">--</button>
+            <button class="answer-btn" onclick="checkAnswer(2)">--</button>
+            <button class="answer-btn" onclick="checkAnswer(3)">--</button>
+        </div>
+        <div style="text-align: center; margin-top: 20px;"><button class="btn btn-danger" onclick="quitGame()">QUIT GAME</button></div>
+    </div>
+    <div id="game-over-screen" class="game-over-screen container">
+        <div class="panel">
+            <h2 class="panel-title">GAME OVER</h2>
+            <div class="final-score" id="final-score">0</div>
+            <div class="stats-summary" id="game-over-stats"></div>
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-primary" onclick="playAgain()">PLAY AGAIN</button>
+                <button class="btn btn-secondary" onclick="showSection('dashboard')">DASHBOARD</button>
+            </div>
+        </div>
+    </div>
+    <div id="leaderboard-section" class="section container">
+        <div class="panel">
+            <h2 class="panel-title">🏆 Leaderboards</h2>
+            <div class="nav-bar" style="margin-bottom: 20px;">
+                <button class="nav-btn" onclick="showLeaderboard('overall')">Overall</button>
+                <button class="nav-btn" onclick="showLeaderboard('classic')">Classic</button>
+                <button class="nav-btn" onclick="showLeaderboard('timeattack')">Time Attack</button>
+                <button class="nav-btn" onclick="showLeaderboard('survival')">Survival</button>
+                <button class="nav-btn" onclick="showLeaderboard('pvp')">PVP</button>
+            </div>
+            <div id="leaderboard-content">
+                <table class="leaderboard-table">
+                    <thead><tr><th>RANK</th><th>PLAYER</th><th>SCORE</th><th>GAMES</th><th>ACCURACY</th></tr></thead>
+                    <tbody id="leaderboard-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="achievements-section" class="section container">
+        <div class="panel">
+            <h2 class="panel-title">🏆 Achievements (<span id="ach-unlocked">0</span>/<span id="ach-total">50</span>)</h2>
+            <div class="achievements-grid" id="achievements-grid"></div>
+        </div>
+    </div>
+    <div id="friends-section" class="section container">
+        <div class="panel">
+            <h2 class="panel-title">My Friends</h2>
+            <div style="text-align: center; margin-bottom: 20px;"><button class="btn btn-primary" onclick="showAddFriendModal()">➕ ADD FRIEND</button></div>
+            <div id="friends-list"></div>
+        </div>
+        <div class="panel">
+            <h2 class="panel-title">Friend Requests</h2>
+            <div id="friend-requests"></div>
+        </div>
+    </div>
+    <div id="messages-section" class="section container">
+        <div class="panel">
+            <h2 class="panel-title">Messages</h2>
+            <div id="messages-list"></div>
+        </div>
+    </div>
+    <div id="profile-section" class="section container">
+        <div class="panel">
+            <div class="profile-header">
+                <div class="avatar" id="profile-avatar">1</div>
+                <h2 id="profile-username">Player</h2>
+                <p style="color: var(--text-secondary);">Member since: <span id="profile-joined">--</span></p>
+                <div id="profile-privacy-badge" class="privacy-badge public">PUBLIC</div>
+            </div>
+            <div class="profile-stats-grid">
+                <div class="profile-stat-box"><div class="profile-stat-value" id="profile-rank">#--</div><div class="profile-stat-label">Overall Rank</div></div>
+                <div class="profile-stat-box"><div class="profile-stat-value" id="profile-score">0</div><div class="profile-stat-label">Total Score</div></div>
+                <div class="profile-stat-box"><div class="profile-stat-value" id="profile-games">0</div><div class="profile-stat-label">Games Played</div></div>
+                <div class="profile-stat-box"><div class="profile-stat-value" id="profile-accuracy">0%</div><div class="profile-stat-label">Accuracy</div></div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="showAvatarModal()">👤 CHANGE AVATAR</button>
+                <button class="btn btn-secondary" onclick="showPrivacyModal()">🔒 PRIVACY SETTINGS</button>
+            </div>
+        </div>
+        <div class="panel">
+            <h2 class="panel-title">📊 Statistics by Mode</h2>
+            <select class="form-input" id="stats-mode-select" onchange="updateModeStats()" style="margin-bottom: 20px;">
+                <option value="classic">Classic Mode</option>
+                <option value="timeattack">Time Attack</option>
+                <option value="survival">Survival Mode</option>
+                <option value="multiplayer">PVP Multiplayer</option>
+            </select>
+            <div id="mode-stats-content"></div>
+        </div>
+        <div class="panel">
+            <h2 class="panel-title">📜 Match History</h2>
+            <div id="match-history"></div>
+        </div>
+    </div>
+    <div id="settings-section" class="section container">
+        <div class="panel">
+            <h2 class="panel-title">⚙️ Settings</h2>
+            <div class="settings-section">
+                <h3 class="settings-title">🔥 Flame Customization</h3>
+                <div class="slider-container"><label class="form-label">Flame Intensity</label><input type="range" class="slider" id="flame-intensity" min="0" max="100" value="50"></div>
+                <div class="toggle-container"><span>Particle Effects</span><div class="toggle active" id="particles-toggle" onclick="toggleSetting('particles')"></div></div>
+            </div>
+            <div class="settings-section">
+                <h3 class="settings-title">🔊 Sound Settings</h3>
+                <div class="toggle-container"><span>Sound Effects</span><div class="toggle active" id="sound-toggle" onclick="toggleSetting('sound')"></div></div>
+                <div class="slider-container"><label class="form-label">Volume</label><input type="range" class="slider" id="volume-slider" min="0" max="100" value="70"></div>
+            </div>
+            <div class="settings-section">
+                <h3 class="settings-title">💥 Screen Effects</h3>
+                <div class="toggle-container"><span>Screen Shake</span><div class="toggle active" id="shake-toggle" onclick="toggleSetting('shake')"></div></div>
+            </div>
+            <div class="settings-section">
+                <h3 class="settings-title">🎨 Flame Color Presets</h3>
+                <div class="color-presets">
+                    <div class="color-preset preset-1 active" onclick="selectColorPreset(1)"></div>
+                    <div class="color-preset preset-2" onclick="selectColorPreset(2)"></div>
+                    <div class="color-preset preset-3" onclick="selectColorPreset(3)"></div>
+                    <div class="color-preset preset-4" onclick="selectColorPreset(4)"></div>
+                    <div class="color-preset preset-5" onclick="selectColorPreset(5)"></div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 30px;"><button class="btn btn-primary" onclick="saveSettings()">SAVE SETTINGS</button></div>
+        </div>
+    </div>
+    <div id="pvp-lobby-section" class="section container">
+        <div class="panel">
+            <h2 class="panel-title">⚔️ PVP Multiplayer Lobby</h2>
+            <div style="text-align: center; margin-bottom: 30px;">
+                <button class="btn btn-primary" onclick="quickMatch()">⚡ QUICK MATCH</button>
+                <button class="btn btn-secondary" onclick="createPVPRoom()">🏠 CREATE ROOM</button>
+            </div>
+            <h3 style="color: var(--neon-cyan); margin-bottom: 15px;">Online Players</h3>
+            <div id="online-players"></div>
+        </div>
+        <div class="panel">
+            <h2 class="panel-title">Your PVP Stats</h2>
+            <div class="profile-stats-grid">
+                <div class="profile-stat-box"><div class="profile-stat-value" id="pvp-rank">#--</div><div class="profile-stat-label">PVP Rank</div></div>
+                <div class="profile-stat-box"><div class="profile-stat-value" id="pvp-wins">0</div><div class="profile-stat-label">Wins</div></div>
+                <div class="profile-stat-box"><div class="profile-stat-value" id="pvp-losses">0</div><div class="profile-stat-label">Losses</div></div>
+                <div class="profile-stat-box"><div class="profile-stat-value" id="pvp-streak">0</div><div class="profile-stat-label">Win Streak</div></div>
+            </div>
+        </div>
+    </div>
+    <div id="pvp-screen" class="pvp-screen container">
+        <div class="game-header">
+            <div class="game-stat"><div class="game-stat-label">MODE</div><div class="game-stat-value">PVP BATTLE</div></div>
+            <div class="game-stat"><div class="game-stat-label">SPECTATORS</div><div class="game-stat-value" id="pvp-spectators">0 👁️</div></div>
+        </div>
+        <div class="pvp-players">
+            <div class="pvp-player" id="pvp-player1">
+                <div class="pvp-player-header"><div class="pvp-player-name" id="pvp-p1-name">You</div><div class="lives-display" id="pvp-p1-lives">❤️❤️❤️</div></div>
+                <div class="pvp-player-stats">
+                    <div><div class="game-stat-label">SCORE</div><div class="game-stat-value" id="pvp-p1-score">0</div></div>
+                    <div><div class="game-stat-label">TIME</div><div class="game-stat-value" id="pvp-p1-time">15</div></div>
+                </div>
+                <div class="question-container" style="margin-top: 20px;">
+                    <div class="question-text" id="pvp-p1-question" style="font-size: 1.5rem;">--</div>
+                    <div class="timer-bar"><div class="timer-fill" id="pvp-p1-timer" style="width: 100%;"></div></div>
+                </div>
+            </div>
+            <div class="pvp-player" id="pvp-player2">
+                <div class="pvp-player-header"><div class="pvp-player-name" id="pvp-p2-name">Opponent</div><div class="lives-display" id="pvp-p2-lives">❤️❤️❤️</div></div>
+                <div class="pvp-player-stats">
+                    <div><div class="game-stat-label">SCORE</div><div class="game-stat-value" id="pvp-p2-score">0</div></div>
+                    <div><div class="game-stat-label">TIME</div><div class="game-stat-value" id="pvp-p2-time">15</div></div>
+                </div>
+                <div class="question-container" style="margin-top: 20px;">
+                    <div class="question-text" id="pvp-p2-question" style="font-size: 1.5rem;">--</div>
+                    <div class="timer-bar"><div class="timer-fill" id="pvp-p2-timer" style="width: 100%;"></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="answer-grid" id="pvp-answer-grid">
+            <button class="answer-btn" onclick="checkPVPAnswer(0)">--</button>
+            <button class="answer-btn" onclick="checkPVPAnswer(1)">--</button>
+            <button class="answer-btn" onclick="checkPVPAnswer(2)">--</button>
+            <button class="answer-btn" onclick="checkPVPAnswer(3)">--</button>
+        </div>
+        <div style="text-align: center; margin-top: 20px;"><button class="btn btn-danger" onclick="surrenderPVP()">🏳️ SURRENDER</button></div>
+    </div>
+    <div id="spectator-view" class="spectator-view container">
+        <div class="spectator-count">👁️ <span id="spec-count">0</span> Spectators</div>
+        <h2 class="panel-title" style="text-align: center;">SPECTATOR MODE</h2>
+        <div class="pvp-players">
+            <div class="pvp-player" id="spec-player1"></div>
+            <div class="pvp-player" id="spec-player2"></div>
+        </div>
+        <div style="text-align: center; margin-top: 20px;"><button class="btn btn-secondary" onclick="exitSpectator()">EXIT SPECTATOR</button></div>
+    </div>
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('auth-modal')">&times;</button>
+            <div id="auth-content"></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="avatar-modal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('avatar-modal')">&times;</button>
+            <h2 class="panel-title">👤 Change Avatar</h2>
+            <div style="text-align: center; margin-bottom: 20px;"><div class="avatar" id="avatar-preview" style="width: 100px; height: 100px; font-size: 3rem;">1</div></div>
+            <div class="form-group"><label class="form-label">Upload Custom Image</label><input type="file" class="form-input" id="avatar-upload" accept="image/*" onchange="previewAvatarUpload()"></div>
+            <div style="text-align: center; margin-top: 20px;"><button class="btn btn-primary" onclick="saveAvatar()">SAVE AVATAR</button><button class="btn btn-secondary" onclick="useDefaultAvatar()">USE DEFAULT</button></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="add-friend-modal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('add-friend-modal')">&times;</button>
+            <h2 class="panel-title">➕ Add Friend</h2>
+            <div class="form-group"><label class="form-label">Search by Username</label><input type="text" class="form-input" id="friend-search" placeholder="Enter username..."></div>
+            <div id="friend-search-results"></div>
+            <div style="text-align: center; margin-top: 20px;"><button class="btn btn-primary" onclick="searchPlayer()">SEARCH</button></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="privacy-modal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal('privacy-modal')">&times;</button>
+            <h2 class="panel-title">🔒 Privacy Settings</h2>
+            <div class="form-group">
+                <label class="form-label">Profile Visibility</label>
+                <select class="form-input" id="privacy-profile"><option value="public">Public (Anyone can view)</option><option value="friends">Friends Only</option><option value="private">Private (Only me)</option></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Match History Visibility</label>
+                <select class="form-input" id="privacy-history"><option value="public">Public (Anyone can see)</option><option value="friends">Friends Only</option><option value="private">Private (Only me)</option></select>
+            </div>
+            <div style="text-align: center; margin-top: 20px;"><button class="btn btn-primary" onclick="savePrivacySettings()">SAVE SETTINGS</button></div>
+        </div>
+    </div>
+    <div class="lock-popup" id="lock-popup">
+        <div class="lock-content">
+            <h2>🔒 FEATURE LOCKED</h2>
+            <p>Create a free account to unlock:</p>
+            <ul class="lock-features">
+                <li>✓ Classic, Time Attack & Survival modes</li>
+                <li>✓ Leaderboard competition</li>
+                <li>✓ Achievements & Avatars</li>
+                <li>✓ Flame customization</li>
+                <li>✓ Friend requests & messaging</li>
+                <li>✓ PVP Multiplayer</li>
+                <li>✓ Spectator Mode</li>
+                <li>✓ Match History & Per-Mode Stats</li>
+            </ul>
+            <div style="margin-top: 20px;"><button class="btn btn-primary" onclick="showAuthModal('signup'); closeLockPopup();">SIGN UP</button><button class="btn btn-secondary" onclick="closeLockPopup()">BACK TO TRIAL</button></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="player-profile-modal">
+        <div class="modal" style="max-width: 700px;"><button class="modal-close" onclick="closeModal('player-profile-modal')">&times;</button><div id="viewed-profile-content"></div></div>
+    </div>
+    <footer style="text-align: center; padding: 30px; color: var(--text-secondary); border-top: 1px solid var(--neon-cyan); margin-top: 50px;">
+        <p>NumerIQ &copy; 2024 | All rights reserved</p>
+        <p>100% Local - No internet needed - Data stored in your browser</p>
+    </footer>
+    <script>
+        const DB_KEY = 'NumerIQDatabase';
+        const SESSION_KEY = 'numeriq_session';
+        const CURRENT_USER_KEY = 'numeriq_currentUser';
+        const SETTINGS_KEY = 'numeriq_settings';
+        let currentUser = null;
+        let isTrialMode = false;
+        let gameState = null;
+        let pvpState = null;
+        let soundManager = null;
+        let particleSystem = null;
+        let timerInterval = null;
+        
+        function getDefaultDatabase() {
+            return {
+                version: "1.0",
+                lastSaved: new Date().toISOString(),
+                users: [],
+                friendRequests: [],
+                friendships: [],
+                messages: [],
+                pvpInvites: [],
+                multiplayerMatches: [],
+                singlePlayerMatches: [],
+                globalStats: { totalPlayers: 0, totalGames: 0, totalMultiplayerMatches: 0, totalProblems: 0, highestScore: 0, highestScoreHolder: null, pvpLeader: null, mostPVPWins: 0, totalSpectatorMinutes: 0 }
+            };
+        }
+        function initDatabase() {
+            let db = localStorage.getItem(DB_KEY);
+            if (!db) {
+                db = getDefaultDatabase();
+                localStorage.setItem(DB_KEY, JSON.stringify(db));
+            }
+            return JSON.parse(localStorage.getItem(DB_KEY));
+        }
+        function saveDatabase(db) {
+            db.lastSaved = new Date().toISOString();
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+        }
+        function getDatabase() {
+            return JSON.parse(localStorage.getItem(DB_KEY)) || getDefaultDatabase();
+        }
+        
+        class SoundManager {
+            constructor() {
+                this.audioContext = null;
+                this.masterGain = null;
+                this.enabled = true;
+                this.volume = 0.7;
+                this.init();
+            }
+            init() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.masterGain = this.audioContext.createGain();
+                    this.masterGain.gain.value = this.volume;
+                    this.masterGain.connect(this.audioContext.destination);
+                } catch (e) { console.log('Web Audio API not supported'); }
+            }
+            resume() {
+                if (this.audioContext && this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+            }
+            playTone(frequency, duration, type = 'sine', startGain = 0.3) {
+                if (!this.enabled || !this.audioContext) return;
+                this.resume();
+                const osc = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                gain.gain.setValueAtTime(startGain * this.volume, this.audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+                osc.start(this.audioContext.currentTime);
+                osc.stop(this.audioContext.currentTime + duration);
+            }
+            playSweep(startFreq, endFreq, duration, type = 'sine') {
+                if (!this.enabled || !this.audioContext) return;
+                this.resume();
+                const osc = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(startFreq, this.audioContext.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(endFreq, this.audioContext.currentTime + duration);
+                gain.gain.setValueAtTime(0.3 * this.volume, this.audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+                osc.start(this.audioContext.currentTime);
+                osc.stop(this.audioContext.currentTime + duration);
+            }
+            correct() { this.playTone(880, 0.2, 'sine', 0.3); setTimeout(() => this.playTone(1100, 0.3, 'sine', 0.2), 50); }
+            wrong() { this.playSweep(200, 100, 0.3, 'sawtooth'); }
+            timeout() {
+                this.playTone(400, 0.2, 'square', 0.2);
+                setTimeout(() => this.playTone(300, 0.2, 'square', 0.2), 200);
+                setTimeout(() => this.playTone(200, 0.3, 'square', 0.2), 400);
+            }
+            click() { this.playTone(1000, 0.05, 'sine', 0.1); }
+            streak5() { this.playSweep(400, 800, 0.3, 'sine'); }
+            streak10() { this.playSweep(600, 1200, 0.5, 'sawtooth'); setTimeout(() => this.playTone(1500, 0.3, 'sine', 0.3), 200); }
+            streak15() {
+                this.playSweep(400, 1000, 0.4, 'sawtooth');
+                setTimeout(() => this.playSweep(800, 1600, 0.4, 'sawtooth'), 200);
+                setTimeout(() => this.playTone(2000, 0.5, 'sine', 0.4), 400);
+            }
+            streak20() {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, i) => { setTimeout(() => this.playTone(freq, 0.4, 'sine', 0.3), i * 100); });
+            }
+            achievement() {
+                const notes = [880, 1100, 1320, 1760];
+                notes.forEach((freq, i) => { setTimeout(() => this.playTone(freq, 0.2, 'sine', 0.25), i * 80); });
+            }
+            levelUp() {
+                const notes = [440, 554, 659, 880];
+                notes.forEach((freq, i) => { setTimeout(() => this.playTone(freq, 0.3, 'sine', 0.3), i * 100); });
+            }
+            gameOver() { this.playSweep(300, 150, 1, 'sawtooth'); }
+            victory() {
+                const notes = [523, 659, 783, 1046, 1318];
+                notes.forEach((freq, i) => { setTimeout(() => this.playTone(freq, 0.4, 'sine', 0.3), i * 120); });
+            }
+            pvpVictory() {
+                const notes = [523, 659, 783, 1046, 1318, 1568];
+                notes.forEach((freq, i) => { setTimeout(() => this.playTone(freq, 0.3, 'sine', 0.35), i * 100); });
+            }
+            pvpDefeat() { this.playSweep(400, 200, 0.8, 'sawtooth'); }
+            pvpInvite() { this.playTone(800, 0.2, 'sine', 0.3); setTimeout(() => this.playTone(1200, 0.3, 'sine', 0.3), 200); }
+            setVolume(vol) { this.volume = vol / 100; if (this.masterGain) { this.masterGain.gain.value = this.volume; } }
+            setEnabled(enabled) { this.enabled = enabled; }
+        }
+        
+        class ParticleSystem {
+            constructor() {
+                this.canvas = document.getElementById('particle-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.enabled = true;
+                this.intensity = 50;
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                this.animate();
+            }
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+            createParticle(streak) {
+                const intensity = Math.min(streak / 20, 1);
+                const colors = this.getColors(streak);
+                return {
+                    x: Math.random() * this.canvas.width,
+                    y: this.canvas.height + 10,
+                    size: 2 + (intensity * 6),
+                    speedY: -0.5 - (intensity * 2),
+                    speedX: (Math.random() - 0.5) * intensity * 2,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    alpha: 0.5 + (intensity * 0.5),
+                    life: 1
+                };
+            }
+            getColors(streak) {
+                if (streak < 3) return ['#88ccff', '#00ffff'];
+                if (streak < 6) return ['#66ff66', '#00ff00', '#88ff88'];
+                if (streak < 9) return ['#ffff66', '#ffff00', '#ffcc00'];
+                if (streak < 12) return ['#ffaa66', '#ff8800', '#ffaa00'];
+                if (streak < 15) return ['#ff6666', '#ff0000', '#ff4444'];
+                if (streak < 18) return ['#ff66ff', '#ff00ff', '#aa00ff'];
+                const hue = (Date.now() * 0.1) % 360;
+                return [`hsl(${hue}, 100%, 70%)`, `hsl(${(hue + 60) % 360}, 100%, 70%)`];
+            }
+            updateStreak(streak) {
+                if (!this.enabled || streak === 0) { this.particles = []; return; }
+                const intensity = Math.min(streak / 20, 1);
+                const targetCount = Math.floor(5 + (streak * 8));
+                while (this.particles.length < targetCount) { this.particles.push(this.createParticle(streak)); }
+                while (this.particles.length > targetCount) { this.particles.pop(); }
+            }
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                if (this.enabled) {
+                    this.particles.forEach((p, i) => {
+                        p.x += p.speedX;
+                        p.y += p.speedY;
+                        p.life -= 0.01;
+                        p.alpha *= 0.99;
+                        if (p.life <= 0 || p.y < -50) { this.particles[i] = this.createParticle(Math.floor(this.particles.length / 8)); }
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.globalAlpha = p.alpha;
+                        this.ctx.fill();
+                        this.ctx.shadowBlur = p.size * 2;
+                        this.ctx.shadowColor = p.color;
+                    });
+                    this.ctx.globalAlpha = 1;
+                    this.ctx.shadowBlur = 0;
+                }
+                requestAnimationFrame(() => this.animate());
+            }
+            setEnabled(enabled) { this.enabled = enabled; if (!enabled) this.particles = []; }
+        }
+        
+        const ACHIEVEMENTS = [
+            { id: 1, name: "Bronze Scholar", desc: "Score 100 points total", icon: "🥉", condition: (u) => u.stats.scores.overall >= 100 },
+            { id: 2, name: "Silver Scholar", desc: "Score 250 points total", icon: "🥈", condition: (u) => u.stats.scores.overall >= 250 },
+            { id: 3, name: "Gold Scholar", desc: "Score 500 points total", icon: "🥇", condition: (u) => u.stats.scores.overall >= 500 },
+            { id: 4, name: "NumerIQ Master", desc: "Score 1000 points total", icon: "👑", condition: (u) => u.stats.scores.overall >= 1000 },
+            { id: 5, name: "Extreme Legend", desc: "Score 5000 points total", icon: "💎", condition: (u) => u.stats.scores.overall >= 5000 },
+            { id: 6, name: "On Fire", desc: "Get a 5-answer streak", icon: "🔥", condition: (u) => u.stats.bestStreak >= 5 },
+            { id: 7, name: "Unstoppable", desc: "Get a 10-answer streak", icon: "⚡", condition: (u) => u.stats.bestStreak >= 10 },
+            { id: 8, name: "Perfect Mind", desc: "Get a 15-answer streak", icon: "🧠", condition: (u) => u.stats.bestStreak >= 15 },
+            { id: 9, name: "Godlike", desc: "Get a 20-answer streak", icon: "😇", condition: (u) => u.stats.bestStreak >= 20 },
+            { id: 10, name: "Legendary", desc: "Get a 30-answer streak", icon: "🌟", condition: (u) => u.stats.bestStreak >= 30 },
+            { id: 11, name: "Time Keeper", desc: "Survive 2 minutes in Time Attack", icon: "⏱️", condition: (u) => u.stats.modeStats.timeAttack.bestTime >= 120 },
+            { id: 12, name: "Time Lord", desc: "Survive 5 minutes in Time Attack", icon: "⌛", condition: (u) => u.stats.modeStats.timeAttack.bestTime >= 300 },
+            { id: 13, name: "Temporal Master", desc: "Survive 10 minutes in Time Attack", icon: "🕐", condition: (u) => u.stats.modeStats.timeAttack.bestTime >= 600 },
+            { id: 14, name: "Chrono Wizard", desc: "Survive 20 minutes in Time Attack", icon: "⏳", condition: (u) => u.stats.modeStats.timeAttack.bestTime >= 1200 },
+            { id: 15, name: "Survivor", desc: "Answer 10 questions in Survival", icon: "🏕️", condition: (u) => u.stats.modeStats.survival.totalCorrect >= 10 },
+            { id: 16, name: "Battle Hardened", desc: "Answer 25 questions in Survival", icon: "⚔️", condition: (u) => u.stats.modeStats.survival.totalCorrect >= 25 },
+            { id: 17, name: "Immortal", desc: "Answer 50 questions in Survival", icon: "👻", condition: (u) => u.stats.modeStats.survival.totalCorrect >= 50 },
+            { id: 18, name: "God of Survival", desc: "Answer 100 questions in Survival", icon: "🏆", condition: (u) => u.stats.modeStats.survival.totalCorrect >= 100 },
+            { id: 19, name: "Quick Thinker", desc: "Answer 3 questions under 3 seconds", icon: "💨", condition: (u) => u.stats.fastestAnswer <= 3 },
+            { id: 20, name: "Speed Demon", desc: "Answer 5 questions under 2 seconds", icon: "🏎️", condition: (u) => u.stats.fastestAnswer <= 2 },
+            { id: 21, name: "Flash Mind", desc: "Answer 10 questions under 1.5 seconds", icon: "⚡", condition: (u) => u.stats.fastestAnswer <= 1.5 },
+            { id: 22, name: "Nanosecond", desc: "Answer 15 questions under 1 second", icon: "🔬", condition: (u) => u.stats.fastestAnswer <= 1 },
+            { id: 23, name: "Steady Hand", desc: "Achieve 70% accuracy", icon: "🎯", condition: (u) => u.stats.questions.accuracy >= 70 },
+            { id: 24, name: "Precision", desc: "Achieve 85% accuracy", icon: "🎯", condition: (u) => u.stats.questions.accuracy >= 85 },
+            { id: 25, name: "Perfectionist", desc: "Complete a game with 100% accuracy", icon: "💯", condition: (u) => u.stats.questions.accuracy >= 100 },
+            { id: 26, name: "Easy Champion", desc: "Score 1000+ in Easy mode", icon: "🟢", condition: (u) => false },
+            { id: 27, name: "Medium Master", desc: "Score 2000+ in Medium mode", icon: "🟡", condition: (u) => false },
+            { id: 28, name: "Hard God", desc: "Score 5000+ in Hard mode", icon: "🔴", condition: (u) => false },
+            { id: 29, name: "Extreme Demon", desc: "Score 10000+ in Extreme mode", icon: "💀", condition: (u) => false },
+            { id: 30, name: "Avatar Collector", desc: "Unlock 10 avatars", icon: "🎭", condition: (u) => u.avatarsUnlocked.length >= 10 },
+            { id: 31, name: "Avatar Enthusiast", desc: "Unlock 25 avatars", icon: "🎨", condition: (u) => u.avatarsUnlocked.length >= 25 },
+            { id: 32, name: "Avatar Master", desc: "Unlock 40 avatars", icon: "🖼️", condition: (u) => u.avatarsUnlocked.length >= 40 },
+            { id: 33, name: "The Chosen One", desc: "Unlock Legendary 67 avatar", icon: "67", condition: (u) => u.avatarsUnlocked.includes('67') },
+            { id: 34, name: "First Blood", desc: "Win your first PVP match", icon: "🩸", condition: (u) => u.stats.multiplayer.wins >= 1 },
+            { id: 35, name: "PVP Rookie", desc: "Win 10 PVP matches", icon: "🌱", condition: (u) => u.stats.multiplayer.wins >= 10 },
+            { id: 36, name: "PVP Veteran", desc: "Win 50 PVP matches", icon: "⭐", condition: (u) => u.stats.multiplayer.wins >= 50 },
+            { id: 37, name: "PVP Elite", desc: "Win 100 PVP matches", icon: "🔥", condition: (u) => u.stats.multiplayer.wins >= 100 },
+            { id: 38, name: "PVP Legend", desc: "Win 250 PVP matches", icon: "⚔️", condition: (u) => u.stats.multiplayer.wins >= 250 },
+            { id: 39, name: "PVP God", desc: "Win 500 PVP matches", icon: "👑", condition: (u) => u.stats.multiplayer.wins >= 500 },
+            { id: 40, name: "On a Roll", desc: "Win 3 PVP matches in a row", icon: "🎲", condition: (u) => u.stats.multiplayer.bestStreak >= 3 },
+            { id: 41, name: "Dominant", desc: "Win 10 PVP matches in a row", icon: "💪", condition: (u) => u.stats.multiplayer.bestStreak >= 10 },
+            { id: 42, name: "Invincible", desc: "Win 15 PVP matches in a row", icon: "🛡️", condition: (u) => u.stats.multiplayer.bestStreak >= 15 },
+            { id: 43, name: "God Mode", desc: "Win 20 PVP matches in a row", icon: "😎", condition: (u) => u.stats.multiplayer.bestStreak >= 20 },
+            { id: 44, name: "Point Machine", desc: "Score 200+ in a PVP match", icon: "💰", condition: (u) => u.stats.multiplayer.highestScore >= 200 },
+            { id: 45, name: "High Scorer", desc: "Score 300+ in a PVP match", icon: "💎", condition: (u) => u.stats.multiplayer.highestScore >= 300 },
+            { id: 46, name: "Unstoppable Force", desc: "Score 400+ in a PVP match", icon: "🚀", condition: (u) => u.stats.multiplayer.highestScore >= 400 },
+            { id: 47, name: "Perfect Game", desc: "Score 500+ in a PVP match", icon: "🏆", condition: (u) => u.stats.multiplayer.highestScore >= 500 },
+            { id: 48, name: "First Time Viewer", desc: "Spectate your first match", icon: "👁️", condition: (u) => false },
+            { id: 49, name: "Match Enthusiast", desc: "Spectate 10 matches", icon: "📺", condition: (u) => false },
+            { id: 50, name: "Super Fan", desc: "Spectate 50 matches", icon: "🍿", condition: (u) => false }
+        ];
+        
+        function generateQuestion(difficulty) {
+            const ops = ['+', '-', '*', '/'];
+            let num1, num2, operator, answer;
+            switch(difficulty) {
+                case 'easy':
+                    num1 = Math.floor(Math.random() * 10) + 1;
+                    num2 = Math.floor(Math.random() * 10) + 1;
+                    operator = ops[Math.floor(Math.random() * 2)];
+                    break;
+                case 'medium':
+                    num1 = Math.floor(Math.random() * 20) + 1;
+                    num2 = Math.floor(Math.random() * 20) + 1;
+                    operator = ops[Math.floor(Math.random() * 3)];
+                    break;
+                case 'hard':
+                    num1 = Math.floor(Math.random() * 50) + 1;
+                    num2 = Math.floor(Math.random() * 50) + 1;
+                    operator = ops[Math.floor(Math.random() * 4)];
+                    break;
+                case 'extreme':
+                    if (Math.random() > 0.5) {
+                        const a = Math.floor(Math.random() * 20) + 1;
+                        const b = Math.floor(Math.random() * 20) + 1;
+                        const c = Math.floor(Math.random() * 10) + 2;
+                        return { text: `(${a} + ${b}) × ${c} = ?`, answer: (a + b) * c, options: generateOptions((a + b) * c, 'extreme') };
+                    } else {
+                        num1 = Math.floor(Math.random() * 100) + 1;
+                        num2 = Math.floor(Math.random() * 100) + 1;
+                        operator = ['+', '-', '*', '/'][Math.floor(Math.random() * 4)];
+                    }
+                    break;
+                default:
+                    num1 = Math.floor(Math.random() * 10) + 1;
+                    num2 = Math.floor(Math.random() * 10) + 1;
+                    operator = '+';
+            }
+            switch(operator) {
+                case '+': answer = num1 + num2; break;
+                case '-': answer = num1 - num2; break;
+                case '*': answer = num1 * num2; break;
+                case '/': answer = num1; num1 = num1 * num2; break;
+            }
+            const opSymbol = operator === '*' ? '×' : operator === '/' ? '÷' : operator;
+            return { text: `${num1} ${opSymbol} ${num2} = ?`, answer: answer, options: generateOptions(answer, difficulty) };
+        }
+        function generateOptions(answer, difficulty) {
+            const options = [answer];
+            const range = difficulty === 'extreme' ? 50 : difficulty === 'hard' ? 30 : difficulty === 'medium' ? 20 : 10;
+            while (options.length < 4) {
+                const offset = Math.floor(Math.random() * range * 2) - range;
+                const wrongAnswer = answer + offset;
+                if (wrongAnswer !== answer && wrongAnswer > 0 && !options.includes(wrongAnswer)) { options.push(wrongAnswer); }
+            }
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+            return options;
+        }
+        
+        function selectGameMode(mode) {
+            if (isTrialMode && mode !== 'practice') { showLockPopup(); return; }
+            gameState = {
+                mode: mode, difficulty: null, score: 0, questionNumber: 1, streak: 0,
+                correctAnswers: 0, wrongAnswers: 0, lives: mode === 'survival' ? 3 : 3,
+                maxLives: 5, timeLeft: 15, maxTime: 15, questions: [],
+                currentQuestion: null, gameOver: false, startTime: Date.now()
+            };
+            if (mode === 'practice') { gameState.maxTime = Infinity; gameState.timeLeft = Infinity; }
+            document.getElementById('difficulty-panel').style.display = 'block';
+            document.getElementById('difficulty-panel').scrollIntoView({ behavior: 'smooth' });
+            updateDifficultyButtons();
+        }
+        function updateDifficultyButtons() {
+            if (!currentUser) return;
+            const totalScore = currentUser.stats.scores.overall;
+            const achievements = currentUser.achievements.length;
+            if (totalScore >= 200) { document.getElementById('diff-medium').classList.remove('locked'); }
+            if (totalScore >= 500) { document.getElementById('diff-hard').classList.remove('locked'); }
+            const hardScore = currentUser.stats.modeStats.classic.gamesByDifficulty.hard.avgScore * currentUser.stats.modeStats.classic.gamesByDifficulty.hard.games;
+            if (hardScore >= 1000 || achievements >= 25) {
+                document.getElementById('diff-extreme').classList.remove('locked');
+                document.getElementById('diff-extreme').innerHTML = 'EXTREME<br>+50/-20<br>7s';
+            }
+        }
+        function selectDifficulty(difficulty) {
+            const btn = document.querySelector(`.difficulty-btn.${difficulty}`);
+            if (btn.classList.contains('locked')) { alert('Complete the requirements to unlock this difficulty!'); return; }
+            gameState.difficulty = difficulty;
+            const timeMap = { easy: 20, medium: 15, hard: 10, extreme: 7 };
+            gameState.maxTime = timeMap[difficulty];
+            gameState.timeLeft = gameState.maxTime;
+            startGame();
+        }
+        function startGame() {
+            showSection('game-screen');
+            document.getElementById('trial-banner').style.display = isTrialMode ? 'block' : 'none';
+            document.getElementById('total-q').textContent = gameState.mode === 'classic' ? '20' : '∞';
+            document.getElementById('lives-stat').style.display = gameState.mode === 'survival' || gameState.mode === 'timeattack' ? 'block' : 'none';
+            if (gameState.mode === 'practice') { document.getElementById('time-stat').style.display = 'none'; }
+            nextQuestion();
+        }
+        function nextQuestion() {
+            if (gameState.gameOver) return;
+            const q = generateQuestion(gameState.difficulty);
+            gameState.currentQuestion = q;
+            gameState.questions.push(q);
+            document.getElementById('question-text').textContent = q.text;
+            document.getElementById('current-q').textContent = gameState.questionNumber;
+            document.getElementById('game-score').textContent = gameState.score;
+            document.getElementById('streak-display').textContent = gameState.streak;
+            document.getElementById('game-lives').textContent = '❤️'.repeat(gameState.lives);
+            updateFlameDisplay();
+            const buttons = document.querySelectorAll('#answer-grid .answer-btn');
+            buttons.forEach((btn, i) => { btn.textContent = q.options[i]; btn.className = 'answer-btn'; btn.disabled = false; });
+            gameState.timeLeft = gameState.maxTime;
+            updateTimerDisplay();
+            if (timerInterval) clearInterval(timerInterval);
+            if (gameState.mode !== 'practice') {
+                timerInterval = setInterval(() => {
+                    gameState.timeLeft -= 0.1;
+                    updateTimerDisplay();
+                    if (gameState.timeLeft <= 0) { handleTimeout(); }
+                }, 100);
+            }
+        }
+        function updateTimerDisplay() {
+            const pct = (gameState.timeLeft / gameState.maxTime) * 100;
+            document.getElementById('timer-fill').style.width = pct + '%';
+            document.getElementById('game-time').textContent = Math.ceil(gameState.timeLeft);
+        }
+        function updateFlameDisplay() {
+            const flameContainer = document.getElementById('flame-display');
+            if (gameState.streak === 0) { flameContainer.innerHTML = ''; if (particleSystem) particleSystem.updateStreak(0); return; }
+            let flameCount = 1;
+            if (gameState.streak >= 5) flameCount = 2;
+            if (gameState.streak >= 10) flameCount = 4;
+            if (gameState.streak >= 15) flameCount = 6;
+            if (gameState.streak >= 20) flameCount = 8;
+            let flameClass = 'streak-1';
+            if (gameState.streak >= 3) flameClass = 'streak-3';
+            if (gameState.streak >= 5) flameClass = 'streak-5';
+            if (gameState.streak >= 7) flameClass = 'streak-7';
+            if (gameState.streak >= 10) flameClass = 'streak-10';
+            if (gameState.streak >= 15) flameClass = 'streak-15';
+            if (gameState.streak >= 20) flameClass = 'streak-20';
+            flameContainer.innerHTML = `<span class="flame ${flameClass}">${'🔥'.repeat(flameCount)}</span>`;
+            let multiplier = 1;
+            if (gameState.streak >= 3) multiplier = 1.5;
+            if (gameState.streak >= 6) multiplier = 2;
+            if (gameState.streak >= 10) multiplier = 2.5;
+            if (gameState.streak >= 15) multiplier = 3;
+            if (gameState.streak >= 20) multiplier = 4;
+            document.getElementById('multiplier-display').textContent = multiplier > 1 ? `${multiplier}x MULTIPLIER` : '';
+            if (particleSystem) particleSystem.updateStreak(gameState.streak);
+        }
+        function checkAnswer(index) {
+            if (gameState.gameOver) return;
+            clearInterval(timerInterval);
+            const buttons = document.querySelectorAll('#answer-grid .answer-btn');
+            const selectedAnswer = gameState.currentQuestion.options[index];
+            const correctAnswer = gameState.currentQuestion.answer;
+            const isCorrect = selectedAnswer === correctAnswer;
+            buttons.forEach(btn => btn.disabled = true);
+            if (isCorrect) {
+                buttons[index].classList.add('correct');
+                showFeedback('CORRECT!', 'correct');
+                soundManager.correct();
+                const pointsMap = { easy: 10, medium: 20, hard: 30, extreme: 50 };
+                let points = pointsMap[gameState.difficulty];
+                let multiplier = 1;
+                if (gameState.streak >= 3) multiplier = 1.5;
+                if (gameState.streak >= 6) multiplier = 2;
+                if (gameState.streak >= 10) multiplier = 2.5;
+                if (gameState.streak >= 15) multiplier = 3;
+                if (gameState.streak >= 20) multiplier = 4;
+                points = Math.floor(points * multiplier);
+                gameState.score += points;
+                gameState.streak++;
+                gameState.correctAnswers++;
+                if (gameState.streak === 5) soundManager.streak5();
+                if (gameState.streak === 10) soundManager.streak10();
+                if (gameState.streak === 15) soundManager.streak15();
+                if (gameState.streak === 20) soundManager.streak20();
+                if (gameState.mode === 'timeattack') { gameState.timeLeft = Math.min(gameState.timeLeft + 2, gameState.maxTime); }
+                if (gameState.mode === 'survival' && gameState.correctAnswers % 5 === 0 && gameState.lives < gameState.maxLives) { gameState.lives++; }
+            } else {
+                buttons[index].classList.add('wrong');
+                const correctIndex = gameState.currentQuestion.options.indexOf(correctAnswer);
+                buttons[correctIndex].classList.add('show-correct');
+                showFeedback('WRONG!', 'wrong');
+                soundManager.wrong();
+                const penaltyMap = { easy: 2, medium: 5, hard: 10, extreme: 20 };
+                gameState.score = Math.max(0, gameState.score - penaltyMap[gameState.difficulty]);
+                gameState.streak = 0;
+                gameState.wrongAnswers++;
+                if (gameState.mode === 'timeattack') { gameState.timeLeft -= 3; }
+                if (gameState.mode === 'survival' || gameState.mode === 'timeattack') {
+                    gameState.lives--;
+                    if (gameState.lives <= 0) { endGame(); return; }
+                }
+            }
+            setTimeout(() => {
+                if (!gameState.gameOver) {
+                    gameState.questionNumber++;
+                    if (gameState.mode === 'classic' && gameState.questionNumber > 20) { endGame(); return; }
+                    nextQuestion();
+                }
+            }, isCorrect ? 1000 : 1500);
+        }
+        function handleTimeout() {
+            clearInterval(timerInterval);
+            showFeedback('TIME OUT!', 'timeout');
+            soundManager.timeout();
+            gameState.streak = 0;
+            gameState.wrongAnswers++;
+            if (gameState.mode === 'survival' || gameState.mode === 'timeattack') {
+                gameState.lives--;
+                if (gameState.lives <= 0) { endGame(); return; }
+            }
+            setTimeout(() => {
+                if (!gameState.gameOver) { gameState.questionNumber++; nextQuestion(); }
+            }, 1500);
+        }
+        function showFeedback(text, type) {
+            const feedback = document.createElement('div');
+            feedback.className = `feedback-message ${type}`;
+            feedback.textContent = text;
+            document.body.appendChild(feedback);
+            setTimeout(() => feedback.remove(), 800);
+        }
+        function endGame() {
+            gameState.gameOver = true;
+            clearInterval(timerInterval);
+            soundManager.gameOver();
+            if (!isTrialMode && currentUser && gameState.mode !== 'practice') { saveGameResults(); }
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('game-over-screen').classList.add('active');
+            document.getElementById('final-score').textContent = gameState.score;
+            const statsHtml = `
+                <div class="profile-stat-box"><div class="profile-stat-value">${gameState.correctAnswers}</div><div class="profile-stat-label">Correct</div></div>
+                <div class="profile-stat-box"><div class="profile-stat-value">${gameState.wrongAnswers}</div><div class="profile-stat-label">Wrong</div></div>
+                <div class="profile-stat-box"><div class="profile-stat-value">${gameState.streak}</div><div class="profile-stat-label">Best Streak</div></div>
+                <div class="profile-stat-box"><div class="profile-stat-value">${Math.round((gameState.correctAnswers / (gameState.correctAnswers + gameState.wrongAnswers)) * 100) || 0}%</div><div class="profile-stat-label">Accuracy</div></div>
+            `;
+            document.getElementById('game-over-stats').innerHTML = statsHtml;
+            if (particleSystem) particleSystem.updateStreak(0);
+        }
+        function saveGameResults() {
+            const db = getDatabase();
+            const user = db.users.find(u => u.playerID === currentUser.playerID);
+            if (!user) return;
+            user.stats.gamesPlayed.total++;
+            user.stats.gamesPlayed[gameState.mode]++;
+            const modeStats = user.stats.modeStats[gameState.mode];
+            modeStats.totalGames++;
+            modeStats.totalScore += gameState.score;
+            modeStats.bestScore = Math.max(modeStats.bestScore, gameState.score);
+            modeStats.totalCorrect += gameState.correctAnswers;
+            modeStats.totalWrong += gameState.wrongAnswers;
+            modeStats.accuracy = Math.round((modeStats.totalCorrect / (modeStats.totalCorrect + modeStats.totalWrong)) * 100) || 0;
+            modeStats.bestStreak = Math.max(modeStats.bestStreak, gameState.streak);
+            if (gameState.mode === 'classic') {
+                const diffStats = modeStats.gamesByDifficulty[gameState.difficulty];
+                diffStats.games++;
+                diffStats.avgScore = Math.round((diffStats.avgScore * (diffStats.games - 1) + gameState.score) / diffStats.games);
+            }
+            user.stats.scores[gameState.mode] += gameState.score;
+            user.stats.scores.overall = user.stats.scores.classic + user.stats.scores.timeattack + user.stats.scores.survival;
+            user.stats.questions.correct += gameState.correctAnswers;
+            user.stats.questions.wrong += gameState.wrongAnswers;
+            user.stats.questions.total += gameState.correctAnswers + gameState.wrongAnswers;
+            user.stats.questions.accuracy = Math.round((user.stats.questions.correct / user.stats.questions.total) * 100) || 0;
+            user.stats.bestStreak = Math.max(user.stats.bestStreak, gameState.streak);
+            const match = {
+                matchID: 'SP' + Date.now(), date: new Date().toISOString(), mode: gameState.mode,
+                difficulty: gameState.difficulty, player: user.playerID, score: gameState.score,
+                correct: gameState.correctAnswers, wrong: gameState.wrongAnswers, streak: gameState.streak,
+                duration: Math.floor((Date.now() - gameState.startTime) / 1000)
+            };
+            db.singlePlayerMatches.push(match);
+            checkAchievements(user);
+            updateRankings(db);
+            saveDatabase(db);
+            currentUser = user;
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+        }
+        function checkAchievements(user) {
+            let newUnlocks = [];
+            ACHIEVEMENTS.forEach(ach => {
+                if (!user.achievements.includes(ach.id) && ach.condition(user)) {
+                    user.achievements.push(ach.id);
+                    newUnlocks.push(ach);
+                }
+            });
+            if (newUnlocks.length > 0) { soundManager.achievement(); }
+        }
+        function updateRankings(db) {
+            const sorted = [...db.users].sort((a, b) => b.stats.scores.overall - a.stats.scores.overall);
+            sorted.forEach((user, index) => { user.rankings.overall = { rank: index + 1, score: user.stats.scores.overall }; });
+            db.globalStats.totalPlayers = db.users.length;
+            db.globalStats.highestScore = sorted[0]?.stats.scores.overall || 0;
+            db.globalStats.highestScoreHolder = sorted[0]?.username || null;
+        }
+        function quitGame() {
+            if (confirm('Are you sure you want to quit? Your progress will not be saved.')) {
+                clearInterval(timerInterval);
+                gameState.gameOver = true;
+                if (particleSystem) particleSystem.updateStreak(0);
+                showSection('dashboard');
+            }
+        }
+        function playAgain() {
+            document.getElementById('game-over-screen').classList.remove('active');
+            showSection('play');
+        }
+        function generatePlayerID(username) {
+            const prefix = username.substring(0, 3).toUpperCase();
+            const timestamp = Date.now().toString().slice(-9);
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return prefix + timestamp + random;
+        }
+        function showAuthModal(type) {
+            const modal = document.getElementById('auth-modal');
+            const content = document.getElementById('auth-content');
+            if (type === 'signup') {
+                content.innerHTML = `
+                    <h2 class="panel-title">📝 Create Account</h2>
+                    <div class="form-group"><label class="form-label">Username (3-20 characters)</label><input type="text" class="form-input" id="signup-username" placeholder="Enter username"><div class="form-error" id="signup-username-error"></div></div>
+                    <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="signup-email" placeholder="Enter email"><div class="form-error" id="signup-email-error"></div></div>
+                    <div class="form-group"><label class="form-label">Password (min 8 characters)</label><input type="password" class="form-input" id="signup-password" placeholder="Enter password"><div class="form-error" id="signup-password-error"></div></div>
+                    <div class="form-group"><label class="form-label">Confirm Password</label><input type="password" class="form-input" id="signup-confirm" placeholder="Confirm password"><div class="form-error" id="signup-confirm-error"></div></div>
+                    <div style="text-align: center; margin-top: 20px;"><button class="btn btn-primary" onclick="signup()">CREATE ACCOUNT</button></div>
+                    <p style="text-align: center; margin-top: 15px;">Already have an account? <a href="#" onclick="showAuthModal('login')" style="color: var(--neon-cyan);">Sign In</a></p>`;
+            } else {
+                content.innerHTML = `
+                    <h2 class="panel-title">🔐 Sign In</h2>
+                    <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="login-email" placeholder="Enter email"></div>
+                    <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="login-password" placeholder="Enter password"></div>
+                    <div class="form-error" id="login-error"></div>
+                    <div style="text-align: center; margin-top: 20px;"><button class="btn btn-primary" onclick="login()">SIGN IN</button></div>
+                    <p style="text-align: center; margin-top: 15px;">Don't have an account? <a href="#" onclick="showAuthModal('signup')" style="color: var(--neon-cyan);">Sign Up</a></p>
+                    <p style="text-align: center; margin-top: 10px;"><a href="#" onclick="startTrialMode(); closeModal('auth-modal');" style="color: var(--text-secondary);">🎮 Continue as Guest (Try Demo)</a></p>`;
+            }
+            modal.classList.add('active');
+        }
+        function signup() {
+            const username = document.getElementById('signup-username').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-confirm').value;
+            let valid = true;
+            if (username.length < 3 || username.length > 20) { document.getElementById('signup-username-error').textContent = 'Username must be 3-20 characters'; valid = false; } else { document.getElementById('signup-username-error').textContent = ''; }
+            if (!email.includes('@')) { document.getElementById('signup-email-error').textContent = 'Please enter a valid email'; valid = false; } else { document.getElementById('signup-email-error').textContent = ''; }
+            if (password.length < 8) { document.getElementById('signup-password-error').textContent = 'Password must be at least 8 characters'; valid = false; } else { document.getElementById('signup-password-error').textContent = ''; }
+            if (password !== confirm) { document.getElementById('signup-confirm-error').textContent = 'Passwords do not match'; valid = false; } else { document.getElementById('signup-confirm-error').textContent = ''; }
+            if (!valid) return;
+            const db = getDatabase();
+            if (db.users.some(u => u.email === email)) { document.getElementById('signup-email-error').textContent = 'Email already registered'; return; }
+            const playerID = generatePlayerID(username);
+            const newUser = {
+                playerID: playerID, username: username, email: email, password: password,
+                joinDate: new Date().toISOString(), lastLogin: new Date().toISOString(),
+                avatar: { type: 'default', number: 1 },
+                stats: {
+                    gamesPlayed: { classic: 0, timeAttack: 0, survival: 0, practice: 0, multiplayer: 0, total: 0 },
+                    modeStats: {
+                        classic: { totalGames: 0, totalScore: 0, bestScore: 0, worstScore: 999999, averageScore: 0, totalCorrect: 0, totalWrong: 0, accuracy: 0, bestStreak: 0, gamesByDifficulty: { easy: { games: 0, avgScore: 0 }, medium: { games: 0, avgScore: 0 }, hard: { games: 0, avgScore: 0 }, extreme: { games: 0, avgScore: 0 } }, last5Scores: [] },
+                        timeAttack: { totalGames: 0, totalScore: 0, bestScore: 0, averageScore: 0, totalCorrect: 0, totalWrong: 0, accuracy: 0, bestTime: 0, totalTimePlayed: 0 },
+                        survival: { totalGames: 0, totalScore: 0, bestScore: 0, averageScore: 0, totalCorrect: 0, totalWrong: 0, accuracy: 0, bestLivesRemaining: 0, totalLivesGained: 0 }
+                    },
+                    multiplayer: { wins: 0, losses: 0, draws: 0, currentStreak: 0, bestStreak: 0, totalPoints: 0, averageScore: 0, highestScore: 0, opponentsDefeated: [] },
+                    questions: { correct: 0, wrong: 0, total: 0, accuracy: 0 },
+                    scores: { classic: 0, timeAttack: 0, survival: 0, overall: 0 },
+                    bestStreak: 0, fastestAnswer: 999
+                },
+                rankings: { overall: { rank: 0, score: 0 }, classic: { rank: 0, score: 0 }, timeAttack: { rank: 0, score: 0 }, survival: { rank: 0, score: 0 }, multiplayer: { rank: 0, score: 0, wins: 0, losses: 0, streak: 0, title: 'PVP ROOKIE' } },
+                friends: [], privacy: { profileVisibility: 'public', matchHistoryVisibility: 'public' },
+                achievements: [], avatarsUnlocked: ['1'], currentAvatar: 'default'
+            };
+            db.users.push(newUser);
+            saveDatabase(db);
+            currentUser = newUser;
+            isTrialMode = false;
+            const session = { playerID: playerID, username: username, loginTime: Date.now(), sessionToken: Math.random().toString(36).substring(2) };
+            localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+            closeModal('auth-modal');
+            initApp();
+            alert(`🎉 Welcome to NumerIQ, ${username}!\n\nYou've been awarded:\n• Starter Avatar (Number 1)\n• "First Step" achievement\n• Initial Rank: #${db.users.length}`);
+        }
+        function login() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const db = getDatabase();
+            const user = db.users.find(u => u.email === email && u.password === password);
+            if (!user) { document.getElementById('login-error').textContent = 'Invalid email or password'; return; }
+            currentUser = user;
+            isTrialMode = false;
+            user.lastLogin = new Date().toISOString();
+            saveDatabase(db);
+            const session = { playerID: user.playerID, username: user.username, loginTime: Date.now(), sessionToken: Math.random().toString(36).substring(2) };
+            localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+            closeModal('auth-modal');
+            initApp();
+        }
+        function logout() {
+            localStorage.removeItem(SESSION_KEY);
+            localStorage.removeItem(CURRENT_USER_KEY);
+            currentUser = null;
+            isTrialMode = false;
+            location.reload();
+        }
+        function startTrialMode() {
+            isTrialMode = true;
+            document.getElementById('landing-section').classList.remove('active');
+            document.getElementById('main-nav').style.display = 'flex';
+            showSection('play');
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const text = btn.textContent.toLowerCase();
+                if (text.includes('friends') || text.includes('messages') || text.includes('pvp')) { btn.onclick = () => showLockPopup(); }
+            });
+        }
+        function showLockPopup() { document.getElementById('lock-popup').classList.add('active'); }
+        function closeLockPopup() { document.getElementById('lock-popup').classList.remove('active'); }
+        function showSection(sectionId) {
+            document.querySelectorAll('.section, .game-screen, .game-over-screen, .pvp-screen, .spectator-view').forEach(el => { el.classList.remove('active'); });
+            const section = document.getElementById(sectionId + '-section');
+            if (section) { section.classList.add('active'); }
+            if (sectionId === 'dashboard') updateDashboard();
+            if (sectionId === 'leaderboard') showLeaderboard('overall');
+            if (sectionId === 'achievements') updateAchievements();
+            if (sectionId === 'friends') updateFriendsList();
+            if (sectionId === 'messages') updateMessages();
+            if (sectionId === 'profile') updateProfile();
+            if (sectionId === 'pvp-lobby') updatePVPLobby();
+        }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+        function updateDashboard() {
+            if (!currentUser) return;
+            document.getElementById('dash-username').textContent = currentUser.username;
+            document.getElementById('dash-rank').textContent = '#' + (currentUser.rankings.overall.rank || '--');
+            document.getElementById('dash-score').textContent = currentUser.stats.scores.overall;
+            document.getElementById('dash-games').textContent = currentUser.stats.gamesPlayed.total;
+            document.getElementById('dash-accuracy').textContent = currentUser.stats.questions.accuracy + '%';
+            const achContainer = document.getElementById('dash-achievements');
+            if (currentUser.achievements.length === 0) { achContainer.innerHTML = '<p class="empty-state">No achievements yet. Start playing to unlock!</p>'; }
+            else { achContainer.innerHTML = currentUser.achievements.slice(-6).map(id => { const ach = ACHIEVEMENTS.find(a => a.id === id); return `<div class="achievement-card unlocked"><div class="achievement-icon">${ach.icon}</div><div class="achievement-info"><h4>${ach.name}</h4><p>${ach.desc}</p></div></div>`; }).join(''); }
+        }
+        function showLeaderboard(type) {
+            const db = getDatabase();
+            let users = [...db.users];
+            switch(type) {
+                case 'overall': users.sort((a, b) => b.stats.scores.overall - a.stats.scores.overall); break;
+                case 'classic': users.sort((a, b) => b.stats.scores.classic - a.stats.scores.classic); break;
+                case 'timeattack': users.sort((a, b) => b.stats.scores.timeattack - a.stats.scores.timeattack); break;
+                case 'survival': users.sort((a, b) => b.stats.scores.survival - a.stats.scores.survival); break;
+                case 'pvp': users.sort((a, b) => b.stats.multiplayer.wins - a.stats.multiplayer.wins); break;
+            }
+            const tbody = document.getElementById('leaderboard-body');
+            if (users.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><div class="empty-state-icon">📊</div><p>No players yet. Be the first!</p></td></tr>`; return; }
+            tbody.innerHTML = users.map((user, index) => {
+                let score, games, accuracy;
+                switch(type) {
+                    case 'overall': score = user.stats.scores.overall; games = user.stats.gamesPlayed.total; accuracy = user.stats.questions.accuracy; break;
+                    case 'classic': score = user.stats.scores.classic; games = user.stats.modeStats.classic.totalGames; accuracy = user.stats.modeStats.classic.accuracy; break;
+                    case 'timeattack': score = user.stats.scores.timeattack; games = user.stats.modeStats.timeAttack.totalGames; accuracy = user.stats.modeStats.timeAttack.accuracy; break;
+                    case 'survival': score = user.stats.scores.survival; games = user.stats.modeStats.survival.totalGames; accuracy = user.stats.modeStats.survival.accuracy; break;
+                    case 'pvp': score = user.stats.multiplayer.wins; games = user.stats.multiplayer.wins + user.stats.multiplayer.losses; accuracy = Math.round((user.stats.multiplayer.wins / (games || 1)) * 100); break;
+                }
+                const rankClass = index < 3 ? `rank-${index + 1}` : '';
+                return `<tr><td class="${rankClass}">${index + 1}</td><td><span class="player-name-link" onclick="viewPlayerProfile('${user.playerID}')">${user.username}</span></td><td>${score}</td><td>${games}</td><td>${accuracy}%</td></tr>`;
+            }).join('');
+        }
+        function updateAchievements() {
+            const container = document.getElementById('achievements-grid');
+            document.getElementById('ach-unlocked').textContent = currentUser ? currentUser.achievements.length : 0;
+            document.getElementById('ach-total').textContent = ACHIEVEMENTS.length;
+            container.innerHTML = ACHIEVEMENTS.map(ach => {
+                const unlocked = currentUser && currentUser.achievements.includes(ach.id);
+                return `<div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}"><div class="achievement-icon">${ach.icon}</div><div class="achievement-info"><h4>${ach.name}</h4><p>${ach.desc}</p></div></div>`;
+            }).join('');
+        }
+        function updateFriendsList() {
+            if (!currentUser) return;
+            const db = getDatabase();
+            const friendsList = document.getElementById('friends-list');
+            const requestsList = document.getElementById('friend-requests');
+            if (currentUser.friends.length === 0) { friendsList.innerHTML = '<p class="empty-state">No friends yet. Add some!</p>'; }
+            else { friendsList.innerHTML = currentUser.friends.map(friendID => { const friend = db.users.find(u => u.playerID === friendID); if (!friend) return ''; const isOnline = (Date.now() - new Date(friend.lastLogin).getTime()) < 300000; return `<div class="friend-item"><div class="friend-info"><div class="friend-avatar">${friend.avatar.type === 'custom' ? '👤' : friend.avatar.number || '1'}</div><div><div>${friend.username} <span class="friend-status ${isOnline ? 'online' : 'offline'}"></span></div><small style="color: var(--text-secondary);">Rank #${friend.rankings.overall.rank || '--'}</small></div></div><div class="friend-actions"><button class="btn btn-secondary" onclick="viewPlayerProfile('${friend.playerID}')">VIEW</button><button class="btn btn-primary" onclick="sendMessage('${friend.playerID}')">💬</button></div></div>`; }).join(''); }
+            const requests = db.friendRequests.filter(r => r.to === currentUser.playerID && r.status === 'pending');
+            if (requests.length === 0) { requestsList.innerHTML = '<p class="empty-state">No pending requests</p>'; }
+            else { requestsList.innerHTML = requests.map(req => { const fromUser = db.users.find(u => u.playerID === req.from); return `<div class="friend-item"><div class="friend-info"><div class="friend-avatar">${fromUser ? (fromUser.avatar.type === 'custom' ? '👤' : fromUser.avatar.number) : '?'}</div><div><div>${fromUser ? fromUser.username : 'Unknown'}</div><small style="color: var(--text-secondary);">${req.message || 'Wants to be friends'}</small></div></div><div class="friend-actions"><button class="btn btn-primary" onclick="acceptFriendRequest('${req.requestID}')">ACCEPT</button><button class="btn btn-danger" onclick="declineFriendRequest('${req.requestID}')">DECLINE</button></div></div>`; }).join(''); }
+            const badge = document.getElementById('friend-badge');
+            if (requests.length > 0) { badge.innerHTML = `<span class="notification-badge">${requests.length}</span>`; } else { badge.innerHTML = ''; }
+        }
+        function updateMessages() {
+            if (!currentUser) return;
+            const db = getDatabase();
+            const messages = db.messages.filter(m => m.to === currentUser.playerID);
+            const container = document.getElementById('messages-list');
+            if (messages.length === 0) { container.innerHTML = '<p class="empty-state">No messages yet</p>'; }
+            else { container.innerHTML = messages.map(msg => { const fromUser = db.users.find(u => u.playerID === msg.from); return `<div class="message-item ${msg.read ? '' : 'unread'}"><div class="message-header"><span class="message-sender">${fromUser ? fromUser.username : 'Unknown'}</span><span class="message-time">${new Date(msg.sentAt).toLocaleDateString()}</span></div><div class="message-content">${msg.content}</div><div style="margin-top: 10px;"><button class="btn btn-secondary" style="padding: 5px 15px; font-size: 0.8rem;" onclick="replyMessage('${msg.from}')">REPLY</button><button class="btn btn-danger" style="padding: 5px 15px; font-size: 0.8rem;" onclick="deleteMessage('${msg.messageID}')">DELETE</button></div></div>`; }).join(''); }
+            const unread = messages.filter(m => !m.read).length;
+            const badge = document.getElementById('message-badge');
+            if (unread > 0) { badge.innerHTML = `<span class="notification-badge">${unread}</span>`; } else { badge.innerHTML = ''; }
+        }
+        function updateProfile() {
+            if (!currentUser) return;
+            document.getElementById('profile-username').textContent = currentUser.username;
+            document.getElementById('profile-joined').textContent = new Date(currentUser.joinDate).toLocaleDateString();
+            document.getElementById('profile-rank').textContent = '#' + (currentUser.rankings.overall.rank || '--');
+            document.getElementById('profile-score').textContent = currentUser.stats.scores.overall;
+            document.getElementById('profile-games').textContent = currentUser.stats.gamesPlayed.total;
+            document.getElementById('profile-accuracy').textContent = currentUser.stats.questions.accuracy + '%';
+            const avatarEl = document.getElementById('profile-avatar');
+            if (currentUser.avatar.type === 'custom' && currentUser.avatar.customImage) { avatarEl.innerHTML = `<img src="${currentUser.avatar.customImage}" alt="Avatar">`; }
+            else { avatarEl.textContent = currentUser.avatar.number || '1'; avatarEl.style.background = getAvatarColor(currentUser.avatar.number || 1); }
+            const privacyBadge = document.getElementById('profile-privacy-badge');
+            privacyBadge.textContent = currentUser.privacy.profileVisibility.toUpperCase();
+            privacyBadge.className = 'privacy-badge ' + currentUser.privacy.profileVisibility;
+            updateModeStats();
+            updateMatchHistory();
+        }
+        function getAvatarColor(num) {
+            const colors = ['#ff3333', '#ff9933', '#ffff33', '#33ff33', '#3333ff', '#6633ff', '#9933ff', '#ff66cc', '#33ffff'];
+            return colors[(num - 1) % colors.length];
+        }
+        function updateModeStats() {
+            if (!currentUser) return;
+            const mode = document.getElementById('stats-mode-select').value;
+            const container = document.getElementById('mode-stats-content');
+            let stats;
+            switch(mode) {
+                case 'classic': stats = currentUser.stats.modeStats.classic; break;
+                case 'timeattack': stats = currentUser.stats.modeStats.timeAttack; break;
+                case 'survival': stats = currentUser.stats.modeStats.survival; break;
+                case 'multiplayer': stats = currentUser.stats.multiplayer; break;
+            }
+            if (!stats || stats.totalGames === 0) { container.innerHTML = '<p class="empty-state">No games played in this mode yet</p>'; return; }
+            container.innerHTML = `<div class="profile-stats-grid"><div class="profile-stat-box"><div class="profile-stat-value">${stats.totalGames}</div><div class="profile-stat-label">Total Games</div></div><div class="profile-stat-box"><div class="profile-stat-value">${stats.totalScore}</div><div class="profile-stat-label">Total Score</div></div><div class="profile-stat-box"><div class="profile-stat-value">${stats.bestScore}</div><div class="profile-stat-label">Best Score</div></div><div class="profile-stat-box"><div class="profile-stat-value">${Math.round(stats.averageScore)}</div><div class="profile-stat-label">Average</div></div><div class="profile-stat-box"><div class="profile-stat-value">${stats.accuracy}%</div><div class="profile-stat-label">Accuracy</div></div><div class="profile-stat-box"><div class="profile-stat-value">${stats.bestStreak || 0}</div><div class="profile-stat-label">Best Streak</div></div></div>`;
+        }
+        function updateMatchHistory() {
+            if (!currentUser) return;
+            const db = getDatabase();
+            const matches = db.singlePlayerMatches.filter(m => m.player === currentUser.playerID).slice(-10).reverse();
+            const container = document.getElementById('match-history');
+            if (matches.length === 0) { container.innerHTML = '<p class="empty-state">No matches played yet</p>'; return; }
+            container.innerHTML = matches.map(match => `<div class="match-history-item"><div><strong>${match.mode.toUpperCase()}</strong> (${match.difficulty})<br><small style="color: var(--text-secondary);">${new Date(match.date).toLocaleDateString()}</small></div><div><span class="match-result win">${match.score} pts</span></div></div>`).join('');
+        }
+        function updatePVPLobby() {
+            if (!currentUser) return;
+            document.getElementById('pvp-rank').textContent = '#' + (currentUser.rankings.multiplayer.rank || '--');
+            document.getElementById('pvp-wins').textContent = currentUser.stats.multiplayer.wins;
+            document.getElementById('pvp-losses').textContent = currentUser.stats.multiplayer.losses;
+            document.getElementById('pvp-streak').textContent = currentUser.stats.multiplayer.currentStreak;
+            const db = getDatabase();
+            const onlinePlayers = db.users.filter(u => u.playerID !== currentUser.playerID).slice(0, 5);
+            const container = document.getElementById('online-players');
+            if (onlinePlayers.length === 0) { container.innerHTML = '<p class="empty-state">No other players online</p>'; }
+            else { container.innerHTML = onlinePlayers.map(player => `<div class="friend-item"><div class="friend-info"><div class="friend-avatar">${player.avatar.type === 'custom' ? '👤' : player.avatar.number}</div><div><div>${player.username} <span class="friend-status online"></span></div><small style="color: var(--text-secondary);">PVP Rank #${player.rankings.multiplayer.rank || '--'}</small></div></div><div class="friend-actions"><button class="btn btn-primary" onclick="sendPVPInvite('${player.playerID}')">⚔️ CHALLENGE</button></div></div>`).join(''); }
+        }
+        function showAddFriendModal() { document.getElementById('add-friend-modal').classList.add('active'); document.getElementById('friend-search-results').innerHTML = ''; document.getElementById('friend-search').value = ''; }
+        function searchPlayer() {
+            const query = document.getElementById('friend-search').value.trim().toLowerCase();
+            if (!query) return;
+            const db = getDatabase();
+            const results = db.users.filter(u => u.playerID !== currentUser.playerID && u.username.toLowerCase().includes(query));
+            const container = document.getElementById('friend-search-results');
+            if (results.length === 0) { container.innerHTML = '<p class="empty-state">No players found</p>'; }
+            else { container.innerHTML = results.map(player => `<div class="friend-item"><div class="friend-info"><div class="friend-avatar">${player.avatar.type === 'custom' ? '👤' : player.avatar.number}</div><div><div>${player.username}</div><small style="color: var(--text-secondary);">Rank #${player.rankings.overall.rank || '--'}</small></div></div><div class="friend-actions"><button class="btn btn-primary" onclick="sendFriendRequest('${player.playerID}')">ADD FRIEND</button></div></div>`).join(''); }
+        }
+        function sendFriendRequest(playerID) {
+            const db = getDatabase();
+            if (currentUser.friends.includes(playerID)) { alert('You are already friends!'); return; }
+            const existing = db.friendRequests.find(r => r.from === currentUser.playerID && r.to === playerID && r.status === 'pending');
+            if (existing) { alert('Friend request already sent!'); return; }
+            const request = { requestID: 'FR' + Date.now(), from: currentUser.playerID, to: playerID, message: "Hey! Let's be friends!", status: 'pending', sentAt: new Date().toISOString(), seen: false };
+            db.friendRequests.push(request);
+            saveDatabase(db);
+            closeModal('add-friend-modal');
+            alert('✅ Friend request sent! It will be stored permanently until they accept.');
+        }
+        function acceptFriendRequest(requestID) {
+            const db = getDatabase();
+            const request = db.friendRequests.find(r => r.requestID === requestID);
+            if (!request) return;
+            request.status = 'accepted';
+            const fromUser = db.users.find(u => u.playerID === request.from);
+            const toUser = db.users.find(u => u.playerID === request.to);
+            if (fromUser && toUser) {
+                if (!fromUser.friends.includes(toUser.playerID)) { fromUser.friends.push(toUser.playerID); }
+                if (!toUser.friends.includes(fromUser.playerID)) { toUser.friends.push(fromUser.playerID); }
+            }
+            saveDatabase(db);
+            updateFriendsList();
+            alert(`You are now friends with ${fromUser ? fromUser.username : 'them'}!`);
+        }
+        function declineFriendRequest(requestID) {
+            const db = getDatabase();
+            const request = db.friendRequests.find(r => r.requestID === requestID);
+            if (request) { request.status = 'declined'; saveDatabase(db); updateFriendsList(); }
+        }
+        function sendMessage(playerID) {
+            const content = prompt('Enter your message:');
+            if (!content) return;
+            const db = getDatabase();
+            const message = { messageID: 'MSG' + Date.now(), from: currentUser.playerID, to: playerID, content: content, sentAt: new Date().toISOString(), read: false };
+            db.messages.push(message);
+            saveDatabase(db);
+            alert('📦 Message sent! It will be delivered when they next play.');
+        }
+        function replyMessage(playerID) { sendMessage(playerID); }
+        function deleteMessage(messageID) {
+            const db = getDatabase();
+            db.messages = db.messages.filter(m => m.messageID !== messageID);
+            saveDatabase(db);
+            updateMessages();
+        }
+        function showAvatarModal() { document.getElementById('avatar-modal').classList.add('active'); updateAvatarPreview(); }
+        function updateAvatarPreview() {
+            const preview = document.getElementById('avatar-preview');
+            if (currentUser.avatar.type === 'custom' && currentUser.avatar.customImage) { preview.innerHTML = `<img src="${currentUser.avatar.customImage}" style="width: 100%; height: 100%; object-fit: cover;">`; }
+            else { preview.textContent = currentUser.avatar.number || '1'; preview.style.background = getAvatarColor(currentUser.avatar.number || 1); }
+        }
+        function previewAvatarUpload() {
+            const file = document.getElementById('avatar-upload').files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('avatar-preview');
+                preview.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                preview.dataset.tempImage = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        function saveAvatar() {
+            const preview = document.getElementById('avatar-preview');
+            const tempImage = preview.dataset.tempImage;
+            if (tempImage) { currentUser.avatar = { type: 'custom', customImage: tempImage }; }
+            const db = getDatabase();
+            const user = db.users.find(u => u.playerID === currentUser.playerID);
+            if (user) { user.avatar = currentUser.avatar; saveDatabase(db); }
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(currentUser));
+            closeModal('avatar-modal');
+            updateProfile();
+        }
+        function useDefaultAvatar() {
+            currentUser.avatar = { type: 'default', number: 1 };
+            const db = getDatabase();
+            const user = db.users.find(u => u.playerID === currentUser.playerID);
+            if (user) { user.avatar = currentUser.avatar; saveDatabase(db); }
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(currentUser));
+            updateAvatarPreview();
+            updateProfile();
+        }
+        function showPrivacyModal() {
+            document.getElementById('privacy-profile').value = currentUser.privacy.profileVisibility;
+            document.getElementById('privacy-history').value = currentUser.privacy.matchHistoryVisibility;
+            document.getElementById('privacy-modal').classList.add('active');
+        }
+        function savePrivacySettings() {
+            currentUser.privacy.profileVisibility = document.getElementById('privacy-profile').value;
+            currentUser.privacy.matchHistoryVisibility = document.getElementById('privacy-history').value;
+            const db = getDatabase();
+            const user = db.users.find(u => u.playerID === currentUser.playerID);
+            if (user) { user.privacy = currentUser.privacy; saveDatabase(db); }
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(currentUser));
+            closeModal('privacy-modal');
+            updateProfile();
+        }
+        function viewPlayerProfile(playerID) {
+            const db = getDatabase();
+            const player = db.users.find(u => u.playerID === playerID);
+            if (!player) return;
+            const canViewFull = player.privacy.profileVisibility === 'public' || (player.privacy.profileVisibility === 'friends' && player.friends.includes(currentUser?.playerID)) || player.playerID === currentUser?.playerID;
+            const content = document.getElementById('viewed-profile-content');
+            if (!canViewFull) {
+                content.innerHTML = `<div class="profile-header"><div class="avatar">${player.avatar.type === 'custom' ? '👤' : player.avatar.number}</div><h2>${player.username}</h2><p style="color: var(--text-secondary);">Member since: ${new Date(player.joinDate).toLocaleDateString()}</p><div class="privacy-badge ${player.privacy.profileVisibility}">${player.privacy.profileVisibility.toUpperCase()}</div></div><div style="text-align: center; padding: 40px;"><p style="font-size: 3rem; margin-bottom: 20px;">🔒</p><p>This player has a private profile</p><p style="color: var(--text-secondary); margin-top: 10px;">Send a friend request to see their stats and achievements</p><div style="margin-top: 20px;"><button class="btn btn-primary" onclick="sendFriendRequest('${player.playerID}'); closeModal('player-profile-modal');">➕ ADD FRIEND</button></div></div>`;
+            } else {
+                content.innerHTML = `<div class="profile-header"><div class="avatar ${player.avatarsUnlocked.includes('67') ? 'legendary' : ''}">${player.avatar.type === 'custom' ? '👤' : player.avatar.number}</div><h2>${player.username}</h2><p style="color: var(--text-secondary);">Member since: ${new Date(player.joinDate).toLocaleDateString()}</p><div class="privacy-badge ${player.privacy.profileVisibility}">${player.privacy.profileVisibility.toUpperCase()}</div></div><div class="profile-stats-grid"><div class="profile-stat-box"><div class="profile-stat-value">#${player.rankings.overall.rank || '--'}</div><div class="profile-stat-label">Overall Rank</div></div><div class="profile-stat-box"><div class="profile-stat-value">${player.stats.scores.overall}</div><div class="profile-stat-label">Total Score</div></div><div class="profile-stat-box"><div class="profile-stat-value">${player.stats.gamesPlayed.total}</div><div class="profile-stat-label">Games Played</div></div><div class="profile-stat-box"><div class="profile-stat-value">${player.stats.questions.accuracy}%</div><div class="profile-stat-label">Accuracy</div></div></div><div style="margin-top: 30px;"><h3 style="color: var(--neon-gold); margin-bottom: 15px;">🏆 Achievements (${player.achievements.length})</h3><div class="achievements-grid">${player.achievements.slice(0, 6).map(id => { const ach = ACHIEVEMENTS.find(a => a.id === id); return ach ? `<div class="achievement-card unlocked"><div class="achievement-icon">${ach.icon}</div><div class="achievement-info"><h4>${ach.name}</h4><p>${ach.desc}</p></div></div>` : ''; }).join('')}</div></div><div style="margin-top: 30px; text-align: center;"><button class="btn btn-primary" onclick="sendFriendRequest('${player.playerID}'); closeModal('player-profile-modal');">➕ ADD FRIEND</button><button class="btn btn-secondary" onclick="sendMessage('${player.playerID}'); closeModal('player-profile-modal');">💬 MESSAGE</button></div>`;
+            }
+            document.getElementById('player-profile-modal').classList.add('active');
+        }
+        function sendPVPInvite(playerID) {
+            const db = getDatabase();
+            const invite = { inviteID: 'PVP' + Date.now(), from: currentUser.playerID, fromName: currentUser.username, fromRank: currentUser.rankings.multiplayer.rank, to: playerID, status: 'pending', sentAt: new Date().toISOString() };
+            db.pvpInvites.push(invite);
+            saveDatabase(db);
+            soundManager.pvpInvite();
+            alert('⚔️ PVP Challenge sent! Waiting for response...');
+        }
+        function quickMatch() {
+            const db = getDatabase();
+            const opponents = db.users.filter(u => u.playerID !== currentUser.playerID);
+            if (opponents.length === 0) { alert('No opponents available. Try again later!'); return; }
+            const opponent = opponents[Math.floor(Math.random() * opponents.length)];
+            startPVPMatch(opponent);
+        }
+        function startPVPMatch(opponent) {
+            pvpState = {
+                gameID: 'MP' + Date.now(),
+                player1: { id: currentUser.playerID, name: currentUser.username, lives: 3, score: 0, timeLeft: 15, status: 'active' },
+                player2: { id: opponent.playerID, name: opponent.username, lives: 3, score: 0, timeLeft: 15, status: 'active' },
+                spectators: [], currentQuestion: generateQuestion('medium'), gameOver: false
+            };
+            showSection('pvp-screen');
+            document.getElementById('pvp-p1-name').textContent = pvpState.player1.name;
+            document.getElementById('pvp-p2-name').textContent = pvpState.player2.name;
+            updatePVPDisplay();
+            startPVPTimer();
+        }
+        function updatePVPDisplay() {
+            document.getElementById('pvp-p1-lives').textContent = '❤️'.repeat(pvpState.player1.lives);
+            document.getElementById('pvp-p2-lives').textContent = '❤️'.repeat(pvpState.player2.lives);
+            document.getElementById('pvp-p1-score').textContent = pvpState.player1.score;
+            document.getElementById('pvp-p2-score').textContent = pvpState.player2.score;
+            document.getElementById('pvp-p1-time').textContent = Math.ceil(pvpState.player1.timeLeft);
+            document.getElementById('pvp-p2-time').textContent = Math.ceil(pvpState.player2.timeLeft);
+            document.getElementById('pvp-p1-question').textContent = pvpState.currentQuestion.text;
+            document.getElementById('pvp-p2-question').textContent = pvpState.currentQuestion.text;
+            const buttons = document.querySelectorAll('#pvp-answer-grid .answer-btn');
+            buttons.forEach((btn, i) => { btn.textContent = pvpState.currentQuestion.options[i]; btn.className = 'answer-btn'; btn.disabled = pvpState.player1.status !== 'active'; });
+            document.getElementById('pvp-p1-timer').style.width = (pvpState.player1.timeLeft / 15 * 100) + '%';
+            document.getElementById('pvp-p2-timer').style.width = (pvpState.player2.timeLeft / 15 * 100) + '%';
+        }
+        function startPVPTimer() {
+            if (pvpState.timerInterval) clearInterval(pvpState.timerInterval);
+            pvpState.timerInterval = setInterval(() => {
+                if (pvpState.gameOver) return;
+                pvpState.player1.timeLeft -= 0.1;
+                pvpState.player2.timeLeft -= 0.1;
+                if (Math.random() < 0.05 && pvpState.player2.status === 'active') {
+                    const correct = Math.random() < 0.7;
+                    if (correct) { pvpState.player2.score += 20; } else { pvpState.player2.lives--; if (pvpState.player2.lives <= 0) { pvpState.player2.status = 'eliminated'; } }
+                    pvpState.player2.timeLeft = 15;
+                }
+                if (pvpState.player1.timeLeft <= 0 && pvpState.player1.status === 'active') { pvpState.player1.lives--; pvpState.player1.timeLeft = 15; if (pvpState.player1.lives <= 0) { pvpState.player1.status = 'eliminated'; } }
+                if (pvpState.player2.timeLeft <= 0 && pvpState.player2.status === 'active') { pvpState.player2.lives--; pvpState.player2.timeLeft = 15; if (pvpState.player2.lives <= 0) { pvpState.player2.status = 'eliminated'; } }
+                if (pvpState.player1.status !== 'active' && pvpState.player2.status !== 'active') { endPVPMatch(); }
+                if (pvpState.player1.timeLeft >= 14.9 && pvpState.player2.timeLeft >= 14.9) { pvpState.currentQuestion = generateQuestion('medium'); }
+                updatePVPDisplay();
+            }, 100);
+        }
+        function checkPVPAnswer(index) {
+            if (pvpState.gameOver || pvpState.player1.status !== 'active') return;
+            const selectedAnswer = pvpState.currentQuestion.options[index];
+            const correctAnswer = pvpState.currentQuestion.answer;
+            const isCorrect = selectedAnswer === correctAnswer;
+            if (isCorrect) { pvpState.player1.score += 20; soundManager.correct(); } else { pvpState.player1.lives--; soundManager.wrong(); if (pvpState.player1.lives <= 0) { pvpState.player1.status = 'eliminated'; } }
+            pvpState.player1.timeLeft = 15;
+            pvpState.currentQuestion = generateQuestion('medium');
+            updatePVPDisplay();
+        }
+        function endPVPMatch() {
+            pvpState.gameOver = true;
+            clearInterval(pvpState.timerInterval);
+            const p1Won = pvpState.player1.score > pvpState.player2.score;
+            if (p1Won) { soundManager.pvpVictory(); currentUser.stats.multiplayer.wins++; currentUser.stats.multiplayer.currentStreak++; } else { soundManager.pvpDefeat(); currentUser.stats.multiplayer.losses++; currentUser.stats.multiplayer.currentStreak = 0; }
+            currentUser.stats.multiplayer.bestStreak = Math.max(currentUser.stats.multiplayer.bestStreak, currentUser.stats.multiplayer.currentStreak);
+            const db = getDatabase();
+            const user = db.users.find(u => u.playerID === currentUser.playerID);
+            if (user) {
+                user.stats.multiplayer = currentUser.stats.multiplayer;
+                db.multiplayerMatches.push({ matchID: pvpState.gameID, date: new Date().toISOString(), mode: 'pvp', player1: pvpState.player1.id, player1Data: { name: pvpState.player1.name, score: pvpState.player1.score, lives: pvpState.player1.lives }, player2: pvpState.player2.id, player2Data: { name: pvpState.player2.name, score: pvpState.player2.score, lives: pvpState.player2.lives }, winner: p1Won ? pvpState.player1.id : pvpState.player2.id });
+                saveDatabase(db);
+            }
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(currentUser));
+            alert(p1Won ? '🎉 VICTORY! You won the match!' : '😔 Defeat. Better luck next time!');
+            showSection('pvp-lobby');
+        }
+        function surrenderPVP() { if (confirm('Are you sure you want to surrender?')) { pvpState.player1.status = 'surrendered'; endPVPMatch(); } }
+        function toggleSetting(setting) { const toggle = document.getElementById(setting + '-toggle'); toggle.classList.toggle('active'); }
+        function selectColorPreset(preset) { document.querySelectorAll('.color-preset').forEach(p => p.classList.remove('active')); document.querySelector('.preset-' + preset).classList.add('active'); }
+        function saveSettings() {
+            const settings = { flameIntensity: document.getElementById('flame-intensity').value, particles: document.getElementById('particles-toggle').classList.contains('active'), sound: document.getElementById('sound-toggle').classList.contains('active'), volume: document.getElementById('volume-slider').value, shake: document.getElementById('shake-toggle').classList.contains('active'), colorPreset: document.querySelector('.color-preset.active')?.classList[1].split('-')[1] || '1' };
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+            if (soundManager) { soundManager.setEnabled(settings.sound); soundManager.setVolume(settings.volume); }
+            if (particleSystem) { particleSystem.setEnabled(settings.particles); }
+            alert('Settings saved!');
+        }
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || { flameIntensity: 50, particles: true, sound: true, volume: 70, shake: true, colorPreset: '1' };
+            document.getElementById('flame-intensity').value = settings.flameIntensity;
+            document.getElementById('volume-slider').value = settings.volume;
+            if (!settings.particles) document.getElementById('particles-toggle').classList.remove('active');
+            if (!settings.sound) document.getElementById('sound-toggle').classList.remove('active');
+            if (!settings.shake) document.getElementById('shake-toggle').classList.remove('active');
+            document.querySelectorAll('.color-preset').forEach(p => p.classList.remove('active'));
+            document.querySelector('.preset-' + settings.colorPreset)?.classList.add('active');
+            return settings;
+        }
+        function checkSession() {
+            const session = localStorage.getItem(SESSION_KEY);
+            const userData = localStorage.getItem(CURRENT_USER_KEY);
+            if (!session || !userData) { return false; }
+            const sessionData = JSON.parse(session);
+            const user = JSON.parse(userData);
+            if (sessionData.playerID !== user.playerID) { localStorage.removeItem(SESSION_KEY); localStorage.removeItem(CURRENT_USER_KEY); return false; }
+            currentUser = user;
+            return true;
+        }
+        function initApp() {
+            if (!currentUser) return;
+            document.getElementById('landing-section').classList.remove('active');
+            document.getElementById('main-nav').style.display = 'flex';
+            showSection('dashboard');
+            soundManager = new SoundManager();
+            particleSystem = new ParticleSystem();
+            loadSettings();
+            const db = getDatabase();
+            const pendingRequests = db.friendRequests.filter(r => r.to === currentUser.playerID && r.status === 'pending');
+            if (pendingRequests.length > 0) { setTimeout(() => { alert(`📨 You have ${pendingRequests.length} pending friend request(s)!`); }, 1000); }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            initDatabase();
+            if (checkSession()) { initApp(); } else { document.getElementById('landing-section').classList.add('active'); }
+        });
+        window.addEventListener('beforeunload', function(e) {
+            if (gameState && !gameState.gameOver && gameState.mode !== 'practice') { e.preventDefault(); e.returnValue = ''; }
+        });
+    </script>
+</body>
+</html>
