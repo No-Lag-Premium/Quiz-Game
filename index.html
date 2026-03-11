@@ -1352,6 +1352,28 @@
         // ==================== REAL-TIME LISTENERS ====================
         function setupRealtimeListeners() {
             if (!currentUser) return;
+
+            // Listen to the current user's document for real‑time updates
+const userUnsub = db.collection('users').doc(currentUser.uid)
+    .onSnapshot(doc => {
+        if (doc.exists) {
+            currentUserData = doc.data();
+            
+            // Refresh sections that are currently visible
+            if (!document.getElementById('achievementsSection').classList.contains('hidden')) {
+                loadAchievements();
+            }
+            if (!document.getElementById('profileSection').classList.contains('hidden')) {
+                loadProfile();
+            }
+            if (!document.getElementById('settingsSection').classList.contains('hidden')) {
+                loadSettings();
+            }
+            // Update header avatar if it changed
+            updateHeaderAvatar();
+        }
+    });
+unsubscribeListeners.push(userUnsub);
             
             // Listen for friend requests
             const frUnsub = db.collection('friendRequests')
